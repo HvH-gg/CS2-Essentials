@@ -3,7 +3,7 @@
 # HvH.gg CS2 Essentials (1.0.0)
 ### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) anymore.
 
-Our CS:GO Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire** and **rapid fire**.
+Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire** and **rapid fire**.
 
 # Features
 - Reset score `!rs`
