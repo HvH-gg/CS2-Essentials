@@ -19,17 +19,17 @@ public class TeleportFix
         if (!_plugin.Config.RestrictTeleport)
             return;
         
-        foreach (var player in Utilities.GetPlayers().Where(p => p.IsPlayer() && p.Pawn.Value != null))
+        foreach (var player in Utilities.GetPlayers().Where(p => p.IsPlayer() && p.Pawn.IsValid && p.Pawn.Value != null))
         {
             var origin = player.Pawn.Value?.AbsOrigin;
             var rotation = player.Pawn.Value?.AbsRotation;
                 
-            if (origin is null)
+            if (origin is null || rotation is null)
                 continue;
 
             if (origin.X != 0 && origin.Y != 0)
             {
-                PreviousPosition[player.Pawn.Index] = new Tuple<Vector, QAngle>(new Vector(origin.X, origin.Y, origin.Z), new QAngle(rotation?.X, rotation?.Y, rotation?.Z));
+                PreviousPosition[player.Pawn.Index] = new Tuple<Vector, QAngle>(new Vector(origin.X, origin.Y, origin.Z), new QAngle(rotation.X, rotation.Y, rotation.Z));
                 continue;
             }
             
