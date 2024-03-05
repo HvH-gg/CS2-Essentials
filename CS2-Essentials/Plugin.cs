@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
@@ -19,28 +20,23 @@ namespace hvhgg_essentials;
 public partial class Cs2EssentialsConfig : BasePluginConfig
 {
     [JsonPropertyName("RapidFireFixMethod")] public FixMethod RapidFireFixMethod { get; set; } = FixMethod.Ignore;
-    
     [JsonPropertyName("RapidFireReflectScale")] public float RapidFireReflectScale { get; set; } = 1f;
-
     [JsonPropertyName("AllowedAwpCount")] public int AllowedAwpCount { get; set; } = -1;
-
     [JsonPropertyName("AllowedScoutCount")] public int AllowedScoutCount { get; set; } = -1;
-
     [JsonPropertyName("AllowedAutoSniperCount")] public int AllowedAutoSniperCount { get; set; } = -1;
-
     [JsonPropertyName("UnmatchedFriendlyFire")] public bool UnmatchedFriendlyFire { get; set; } = true;
-
+    [JsonPropertyName("RestrictTeleport")] public bool RestrictTeleport { get; set; } = true;
+    [JsonPropertyName("AllowAdPrint")] public bool AllowAdPrint { get; set; } = true;
     [JsonPropertyName("AllowResetScore")] public bool AllowResetScore { get; set; } = true;
-
     [JsonPropertyName("AllowRageQuit")] public bool AllowRageQuit { get; set; } = true;
-    
     [JsonPropertyName("ChatPrefix")] public string ChatPrefix { get; set; } = "[{Red}Hv{DarkRed}H{Default}.gg]";
+    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 2;
 }
 
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.0.0";
+    public override string ModuleVersion => "1.0.1";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -53,6 +49,24 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     public void OnConfigParsed(Cs2EssentialsConfig config)
     {
         Config = config;
+        UpdateConfig(config);
+    }
+    
+    private static void UpdateConfig<T>(T config) where T : BasePluginConfig, new()
+    {
+        // get current config version
+        var newCfgVersion = new T().Version;
+        
+        // loaded config is up to date
+        if (config.Version == newCfgVersion)
+            return;
+        
+        // update the version
+        config.Version = newCfgVersion;
+        
+        // serialize the updated config back to json
+        var updatedJsonContent = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(CfgPath, updatedJsonContent);
     }
 
     public override void Load(bool hotReload)
@@ -74,6 +88,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         services.AddSingleton<RapidFire>();
         services.AddSingleton<WeaponRestrict>();
         services.AddSingleton<FriendlyFire>();
+        services.AddSingleton<TeleportFix>();
         services.AddSingleton<Misc>();
         
         _serviceProvider = services.BuildServiceProvider();
@@ -85,18 +100,16 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         UseRageQuit();
         UseResetScore();
         UseMisc();
-
-        var misc = _serviceProvider.GetRequiredService<Misc>();
-        
-        RegisterEventHandler<EventPlayerSpawn>((eventPlayerSpawn, info) =>
-        {
-            misc.AnnounceRules(eventPlayerSpawn.Userid);
-            return HookResult.Continue;
-        });
+        UseTeleport();
 
         Console.WriteLine("[HvH.gg] Finished loading HvH.gg Essentials plugin");
     }
-
+    
+    private void UseTeleport()
+    {
+        var teleportFix = _serviceProvider!.GetRequiredService<TeleportFix>();
+        RegisterListener<Listeners.OnTick>(teleportFix.OnTick);
+    }
     private void UseMisc()
     {
         Console.WriteLine("[HvH.gg] Register misc commands");
@@ -104,9 +117,14 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         var misc = _serviceProvider!.GetRequiredService<Misc>();
         RegisterConsoleCommandAttributeHandlers(misc);
         
+        RegisterEventHandler<EventPlayerSpawn>((eventPlayerSpawn, info) =>
+        {
+            misc.AnnounceRules(eventPlayerSpawn.Userid);
+            return HookResult.Continue;
+        });
+        
         Console.WriteLine("[HvH.gg] Finished registering misc commands");
     }
-    
     private void UseResetScore()
     {
         Console.WriteLine("[HvH.gg] Register reset score command");
@@ -116,7 +134,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         Console.WriteLine("[HvH.gg] Finished registering reset score command");
     }
-
     private void UseRageQuit()
     {
         Console.WriteLine("[HvH.gg] Register rage quit command");
@@ -126,7 +143,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         Console.WriteLine("[HvH.gg] Finished registering rage quit command");
     }
-
     private void UseFriendlyFireRestrict()
     {
         Console.WriteLine("[HvH.gg] Register friendly fire listeners");
@@ -156,6 +172,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         Console.WriteLine("[HvH.gg] Finished registering weapon restriction listeners");
     }
+    
     
     public override void Unload(bool hotReload)
     {
