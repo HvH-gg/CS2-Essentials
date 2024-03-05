@@ -22,7 +22,7 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 2. Place the `addons` folder in your servers `game/csgo/` directory  
    ![extract](https://du.hurenso.hn/r/0NyFPY.png)
 3. Edit the config file to your liking  
-   3.1. Located at `addons/counterstrikesharp/configs/plugins/CS2Essentials/CS2Essentials.json`
+   3.1. Located at `addons/counterstrikesharp/configs/plugins/CS2-Essentials/CS2-Essentials.json`
 4. Restart your server
 
 # Config
