@@ -1,12 +1,16 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Runtime.CompilerServices;
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
+using hvhgg_essentials.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace hvhgg_essentials.Features;
 
 public class TeleportFix
 {
     private readonly Plugin _plugin;
-    private static readonly Dictionary<uint, Tuple<Vector, QAngle>> PreviousPosition = new();
     private readonly Dictionary<uint, float> _teleportBlockWarnings = new();
 
     public TeleportFix(Plugin plugin)
@@ -14,40 +18,37 @@ public class TeleportFix
         _plugin = plugin;
     }
 
-    public void OnTick()
+    public HookResult RunCommand(DynamicHook h)
     {
         if (!_plugin.Config.RestrictTeleport)
-            return;
+            return HookResult.Continue;
         
-        foreach (var player in Utilities.GetPlayers().Where(p => p.IsPlayer() && p.Pawn.IsValid && p.Pawn.Value != null))
-        {
-            var origin = player.Pawn.Value?.AbsOrigin;
-            var rotation = player.Pawn.Value?.AbsRotation;
-                
-            if (origin is null || rotation is null)
-                continue;
+        // check if the player is a valid player
+        var player = h.GetParam<CCSPlayer_MovementServices>(0).Pawn.Value.Controller.Value!.As<CCSPlayerController>();
+        if (!player.IsPlayer())
+            return HookResult.Continue;
+        
+        // get the user command and view angles
+        var userCmd = new CUserCmd(h.GetParam<IntPtr>(1));
+        var viewAngles = userCmd.GetViewAngles();
+        
+        // no valid view angles or not infinite
+        if (viewAngles is null || !viewAngles.IsInfinity()) 
+            return HookResult.Continue;
+        
+        // fix the view angles (prevents the player from using teleport or airstuck)
+        viewAngles.FixInfinity();
 
-            if (origin.X != 0 && origin.Y != 0)
-            {
-                PreviousPosition[player.Pawn.Index] = new Tuple<Vector, QAngle>(new Vector(origin.X, origin.Y, origin.Z), new QAngle(rotation.X, rotation.Y, rotation.Z));
-                continue;
-            }
-            
-            Console.WriteLine($"[HvH.gg] Detected teleport from {player.PlayerName}");
+        // not warned yet or last warning was more than 3 seconds ago
+        if (_teleportBlockWarnings.TryGetValue(player.Index, out var lastWarningTime) &&
+            !(lastWarningTime + 3 <= Server.CurrentTime)) 
+            return HookResult.Changed;
+        
+        // print a warning to all players
+        var feature = player.Pawn.Value.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
+        Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
+        _teleportBlockWarnings[player.Index] = Server.CurrentTime;
 
-            // not warned yet or last warning was more than 3 seconds ago
-            if (!_teleportBlockWarnings.TryGetValue(player.Index, out var lastWarningTime) ||
-                lastWarningTime + 3 <= Server.CurrentTime)
-            {
-                Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}teleport{ChatColors.Default}!");
-                _teleportBlockWarnings[player.Index] = Server.CurrentTime;
-            }
-
-            if (!player.Pawn.IsValid || !PreviousPosition.TryGetValue(player.Pawn.Index, out var previousPosition)) 
-                continue;
-            
-            Console.WriteLine($"[HvH.gg] Teleporting {player.PlayerName} back to {previousPosition}");
-            player.Pawn.Value?.Teleport(previousPosition.Item1, previousPosition.Item2, player.Pawn.Value?.AbsVelocity ?? new Vector());
-        }
+        return HookResult.Changed;
     }
 }
