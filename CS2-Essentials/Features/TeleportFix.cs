@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using hvhgg_essentials.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace hvhgg_essentials.Features;
 
@@ -23,10 +24,10 @@ public class TeleportFix
             return HookResult.Continue;
         
         // check if the player is a valid player
-        var player = h.GetParam<CCSPlayer_MovementServices>(0).Pawn.Value.Controller.Value?.As<CCSPlayerController>();
-        if (player.IsPlayer() || player!.Pawn.Value == null)
+        var player = h.GetParam<CCSPlayer_MovementServices>(0).Pawn.Value.Controller.Value!.As<CCSPlayerController>();
+        if (!player.IsPlayer())
             return HookResult.Continue;
-
+        
         // get the user command and view angles
         var userCmd = new CUserCmd(h.GetParam<IntPtr>(1));
         var viewAngles = userCmd.GetViewAngles();
@@ -49,6 +50,5 @@ public class TeleportFix
         _teleportBlockWarnings[player.Index] = Server.CurrentTime;
 
         return HookResult.Changed;
-
     }
 }

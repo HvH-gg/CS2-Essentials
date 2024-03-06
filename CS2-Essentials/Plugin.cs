@@ -8,7 +8,6 @@ using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
-using CounterStrikeSharp.API.Modules.Utils;
 using hvhgg_essentials.Enums;
 using hvhgg_essentials.Features;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +43,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     
     private static readonly string AssemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
     public static readonly string CfgPath = $"{Server.GameDirectory}/csgo/addons/counterstrikesharp/configs/plugins/{AssemblyName}/{AssemblyName}.json";
+    
     public required MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr> RunCommand;
 
     public void OnConfigParsed(Cs2EssentialsConfig config)
@@ -108,6 +108,9 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     private void UseTeleport()
     {
         var teleportFix = _serviceProvider!.GetRequiredService<TeleportFix>();
+        
+        Console.WriteLine("[HvH.gg] Hooking run command");
+        
         RunCommand = new(GameData.GetSignature("RunCommand"));
         RunCommand.Hook(teleportFix.RunCommand, HookMode.Pre);
     }
@@ -121,6 +124,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         RegisterEventHandler<EventPlayerSpawn>((eventPlayerSpawn, info) =>
         {
             misc.AnnounceRules(eventPlayerSpawn.Userid);
+            
             return HookResult.Continue;
         });
         
@@ -210,5 +214,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         var teleportFix = _serviceProvider.GetRequiredService<TeleportFix>();
         RunCommand.Unhook(teleportFix.RunCommand, HookMode.Pre);
+        
     }
 }
