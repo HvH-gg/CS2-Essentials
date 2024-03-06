@@ -4,11 +4,10 @@ using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
-using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
 using hvhgg_essentials.Enums;
 using hvhgg_essentials.Features;
@@ -36,7 +35,7 @@ public partial class Cs2EssentialsConfig : BasePluginConfig
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.0.2";
+    public override string ModuleVersion => "1.1.0";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -45,6 +44,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     
     private static readonly string AssemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
     public static readonly string CfgPath = $"{Server.GameDirectory}/csgo/addons/counterstrikesharp/configs/plugins/{AssemblyName}/{AssemblyName}.json";
+    public required MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr> RunCommand;
 
     public void OnConfigParsed(Cs2EssentialsConfig config)
     {
@@ -108,7 +108,8 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     private void UseTeleport()
     {
         var teleportFix = _serviceProvider!.GetRequiredService<TeleportFix>();
-        RegisterListener<Listeners.OnTick>(teleportFix.OnTick);
+        RunCommand = new(GameData.GetSignature("RunCommand"));
+        RunCommand.Hook(teleportFix.RunCommand, HookMode.Pre);
     }
     private void UseMisc()
     {
@@ -173,6 +174,22 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         Console.WriteLine("[HvH.gg] Finished registering weapon restriction listeners");
     }
     
+    [ConsoleCommand("css_reload_cfg", "Reload the config in the current session without restarting the server")]
+    [RequiresPermissions("@css/generic")]
+    [CommandHelper(minArgs: 0, whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    public void OnReloadConfigCommand(CCSPlayerController? player, CommandInfo info)
+    {
+        var config = File.ReadAllText(CfgPath);
+        try
+        {
+            OnConfigParsed(JsonSerializer.Deserialize<Cs2EssentialsConfig>(config,
+                new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip })!);
+        }
+        catch (Exception e)
+        {
+            info.ReplyToCommand($"[HvH.gg] Failed to reload config: {e.Message}");
+        }
+    }
     
     public override void Unload(bool hotReload)
     {
@@ -191,5 +208,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         RegisterEventHandler<EventItemPurchase>(weaponRestrict.OnItemPurchase);
         VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Unhook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
         
+        var teleportFix = _serviceProvider.GetRequiredService<TeleportFix>();
+        RunCommand.Unhook(teleportFix.RunCommand, HookMode.Pre);
     }
 }

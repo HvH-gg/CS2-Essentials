@@ -57,7 +57,7 @@ public class Misc
         
         player.PrintToChat($"unmatched.{ChatColors.Orange}gg{ChatColors.Default} friendly fire: {(_plugin.Config.UnmatchedFriendlyFire ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
         
-        player.PrintToChat($"Teleport: {(!_plugin.Config.RestrictTeleport ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
+        player.PrintToChat($"Teleport/Airstuck: {(!_plugin.Config.RestrictTeleport ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
 
         player.PrintToChat($"Rapid fire: {(_plugin.Config.RapidFireFixMethod == FixMethod.Allow ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
 
