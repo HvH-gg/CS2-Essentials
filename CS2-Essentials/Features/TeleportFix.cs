@@ -33,11 +33,12 @@ public class TeleportFix
         var viewAngles = userCmd.GetViewAngles();
         
         // no valid view angles or not infinite
-        if (viewAngles is null || !viewAngles.IsInfinity()) 
+        if (viewAngles is null || (!viewAngles.IsInfinity() && !viewAngles.IsNaN())) 
             return HookResult.Continue;
         
         // fix the view angles (prevents the player from using teleport or airstuck)
         viewAngles.FixInfinity();
+        viewAngles.FixNaN();
 
         // not warned yet or last warning was more than 3 seconds ago
         if (_teleportBlockWarnings.TryGetValue(player.Index, out var lastWarningTime) &&
@@ -45,7 +46,7 @@ public class TeleportFix
             return HookResult.Changed;
         
         // print a warning to all players
-        var feature = player.Pawn.Value.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
+        var feature = player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
         Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
         _teleportBlockWarnings[player.Index] = Server.CurrentTime;
 
