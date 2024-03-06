@@ -25,10 +25,11 @@ public partial class Cs2EssentialsConfig : BasePluginConfig
     [JsonPropertyName("UnmatchedFriendlyFire")] public bool UnmatchedFriendlyFire { get; set; } = true;
     [JsonPropertyName("RestrictTeleport")] public bool RestrictTeleport { get; set; } = true;
     [JsonPropertyName("AllowAdPrint")] public bool AllowAdPrint { get; set; } = true;
+    [JsonPropertyName("AllowSettingsPrint")] public bool AllowSettingsPrint { get; set; } = true;
     [JsonPropertyName("AllowResetScore")] public bool AllowResetScore { get; set; } = true;
     [JsonPropertyName("AllowRageQuit")] public bool AllowRageQuit { get; set; } = true;
     [JsonPropertyName("ChatPrefix")] public string ChatPrefix { get; set; } = "[{Red}Hv{DarkRed}H{Default}.gg]";
-    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 2;
+    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 3;
 }
 
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
