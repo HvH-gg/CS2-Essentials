@@ -24,7 +24,10 @@ public class RapidFire
         if (!eventWeaponFire.Userid.IsPlayer())
             return HookResult.Continue;
         
-        var nextPrimaryAttackTick = eventWeaponFire.Userid.Pawn.Value?.WeaponServices?.ActiveWeapon.Value?.NextPrimaryAttackTick ?? 0;
+        var firedWeapon = eventWeaponFire.Userid.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
+        var weaponData = firedWeapon?.GetVData<CCSWeaponBaseVData>();
+        
+        var nextPrimaryAttackTick = firedWeapon?.NextPrimaryAttackTick ?? 0;
         var index = eventWeaponFire.Userid.Pawn.Index;
             
         if (!_lastPlayerShotTick.TryGetValue(index, out var lastShotTick))
@@ -34,10 +37,13 @@ public class RapidFire
         }
             
         _lastPlayerShotTick[index] = Server.TickCount;
+        
+        var shotTickDiff = Server.TickCount - lastShotTick;
+        var possibleAttackDiff = (weaponData?.CycleTime.Values[0] * 64 ?? 0) - 1;
 
         // this is ghetto but should work for now
-        if (nextPrimaryAttackTick > lastShotTick)
-            return HookResult.Continue;
+        if (shotTickDiff > possibleAttackDiff)
+            return HookResult.Continue; 
 
         // no chat message if we allow rapid fire
         if (_plugin.Config.RapidFireFixMethod == FixMethod.Allow)
