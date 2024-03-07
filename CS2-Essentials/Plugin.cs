@@ -35,7 +35,7 @@ public partial class Cs2EssentialsConfig : BasePluginConfig
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.1.2";
+    public override string ModuleVersion => "1.1.3";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
