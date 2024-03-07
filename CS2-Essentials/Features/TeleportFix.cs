@@ -33,12 +33,11 @@ public class TeleportFix
         var viewAngles = userCmd.GetViewAngles();
         
         // no valid view angles or not infinite
-        if (viewAngles is null || (!viewAngles.IsInfinity() && !viewAngles.IsNaN())) 
+        if (viewAngles is null || !viewAngles.IsValid()) 
             return HookResult.Continue;
         
         // fix the view angles (prevents the player from using teleport or airstuck)
-        viewAngles.FixInfinity();
-        viewAngles.FixNaN();
+        viewAngles.Fix();
 
         // not warned yet or last warning was more than 3 seconds ago
         if (_teleportBlockWarnings.TryGetValue(player.Index, out var lastWarningTime) &&
