@@ -33,7 +33,7 @@ public class TeleportFix
         var viewAngles = userCmd.GetViewAngles();
         
         // no valid view angles or not infinite
-        if (viewAngles is null || !viewAngles.IsValid()) 
+        if (viewAngles is null || viewAngles.IsValid()) 
             return HookResult.Continue;
         
         // fix the view angles (prevents the player from using teleport or airstuck)
