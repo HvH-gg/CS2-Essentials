@@ -1,7 +1,10 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Cvars;
+using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2_CustomVotes.Shared.Models;
 using hvhgg_essentials.Enums;
 
 namespace hvhgg_essentials.Features;
@@ -13,10 +16,56 @@ public class RapidFire
     private readonly Dictionary<uint, float> _rapidFireBlockWarnings = new();
 
     private readonly Plugin _plugin;
+    public static readonly FakeConVar<int> hvh_restrict_rapidfire = new("hvh_restrict_rapidfire", "Restrict rapid fire", 0, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(0, 3));
+    public static readonly FakeConVar<float> hvh_rapidfire_reflect_scale = new("hvh_rapidfire_reflect_scale", "Reflect scale", 1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<float>(0, 1));
 
     public RapidFire(Plugin plugin)
     {
         _plugin = plugin;
+        _plugin.RegisterFakeConVars(this);
+        hvh_restrict_rapidfire.Value = (int) _plugin.Config.RapidFireFixMethod;
+        hvh_rapidfire_reflect_scale.Value = _plugin.Config.RapidFireReflectScale;
+    }
+
+    public static void RegisterCustomVotes(Plugin plugin)
+    {
+        var defaultOption = plugin.Config.RapidFireFixMethod switch
+        {
+            FixMethod.Allow => "Allow",
+            FixMethod.Ignore => "Block",
+            FixMethod.Reflect => "Reflect",
+            FixMethod.ReflectSafe => "Reflect (safe)",
+            _ => "Allow"
+        };
+
+        var options = new Dictionary<string, VoteOption>();
+
+        if (plugin.Config.CustomVoteSettings.RapidFireVote != "off")
+        {
+            options.Add("Allow", new VoteOption("{Green}Allow", new List<string> { "hvh_restrict_rapidfire 0" }));
+            options.Add("Block", new VoteOption("{Red}Block", new List<string> { "hvh_restrict_rapidfire 1" }));
+            
+            if (plugin.Config.CustomVoteSettings.RapidFireVote == "full")
+            {
+                options.Add("Reflect", new VoteOption("{Orange}Reflect", new List<string> { "hvh_restrict_rapidfire 2" }));
+                options.Add("Reflect (safe)", new VoteOption("{Orange}Reflect (safe)", new List<string> { "hvh_restrict_rapidfire 3" }));
+            }
+        }
+        
+        Plugin.CustomVotesApi.Get()?.AddCustomVote(
+            "rapidfire", 
+            new List<string> {
+              "rf"  
+            },
+            "Rapid fire", 
+            defaultOption, 
+            30,
+            options, 
+            plugin.Config.CustomVoteSettings.Style);
+    }
+    public static void UnregisterCustomVotes(Plugin plugin)
+    {
+        Plugin.CustomVotesApi.Get()?.RemoveCustomVote("rapidfire");
     }
 
     public HookResult OnWeaponFire(EventWeaponFire eventWeaponFire, GameEventInfo info)
@@ -27,7 +76,6 @@ public class RapidFire
         var firedWeapon = eventWeaponFire.Userid.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
         var weaponData = firedWeapon?.GetVData<CCSWeaponBaseVData>();
         
-        var nextPrimaryAttackTick = firedWeapon?.NextPrimaryAttackTick ?? 0;
         var index = eventWeaponFire.Userid.Pawn.Index;
             
         if (!_lastPlayerShotTick.TryGetValue(index, out var lastShotTick))

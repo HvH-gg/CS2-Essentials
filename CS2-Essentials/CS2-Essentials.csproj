@@ -9,7 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CounterStrikeSharp.API" Version="1.0.167" />
+      <PackageReference Include="CounterStrikeSharp.API" Version="1.0.191" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="CS2-CustomVotes.Shared">
+        <HintPath>..\..\CS2-CustomVotes\CS2-CustomVotes.Shared\bin\Release\net7.0\CS2-CustomVotes.Shared.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

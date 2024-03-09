@@ -1,5 +1,7 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Cvars;
+using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -17,10 +19,17 @@ public class WeaponRestrict
         { "weapon_g3sg1", new Tuple<ItemDefinition, int>(ItemDefinition.G3SG1, 5000) },
     };
     private readonly Dictionary<uint, float> _lastWeaponRestrictPrint = new();
+    public static readonly FakeConVar<int> hvh_restrict_awp = new("hvh_restrict_awp", "Restrict awp to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
+    public static readonly FakeConVar<int> hvh_restrict_scout = new("hvh_restrict_scout", "Restrict scout to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
+    public static readonly FakeConVar<int> hvh_restrict_auto = new("hvh_restrict_auto", "Restrict autosniper to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
 
     public WeaponRestrict(Plugin plugin)
     {
         _plugin = plugin;
+        _plugin.RegisterFakeConVars(this);
+        hvh_restrict_awp.Value = _plugin.Config.AllowedAwpCount;
+        hvh_restrict_scout.Value = _plugin.Config.AllowedScoutCount;
+        hvh_restrict_auto.Value = _plugin.Config.AllowedAutoSniperCount;
     }
     
     public HookResult OnWeaponCanUse(DynamicHook hook)
