@@ -1,8 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2_CustomVotes.Shared.Models;
 using hvhgg_essentials.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,10 +14,37 @@ public class TeleportFix
 {
     private readonly Plugin _plugin;
     private readonly Dictionary<uint, float> _teleportBlockWarnings = new();
+    public static readonly FakeConVar<bool> hvh_restrict_teleport = new("hvh_restrict_teleport", "Restricts players from teleporting/airstucking and crashing the server", true, ConVarFlags.FCVAR_REPLICATED);
 
     public TeleportFix(Plugin plugin)
     {
         _plugin = plugin;
+        _plugin.RegisterFakeConVars(this);
+        hvh_restrict_teleport.Value = _plugin.Config.RestrictTeleport;
+    }
+    
+    public static void RegisterCustomVotes(Plugin plugin)
+    {
+        if (!plugin.Config.CustomVoteSettings.TeleportFixVote)
+            return;
+        
+        var defaultOption = plugin.Config.RestrictTeleport ? "Block" : "Allow";
+        
+        Plugin.CustomVotesApi.Get()?.AddCustomVote(
+            "teleport", 
+            "Teleport/Airstuck", 
+            defaultOption, 
+            30,
+            new Dictionary<string, VoteOption>
+            {
+                { "Allow", new("{Green}Allow", new List<string> { "hvh_restrict_teleport 0" })},
+                { "Block", new("{Red}Block", new List<string> { "hvh_restrict_teleport 1" })},
+            },
+            plugin.Config.CustomVoteSettings.Style);
+    }
+    public static void UnregisterCustomVotes(Plugin plugin)
+    {
+        Plugin.CustomVotesApi.Get()?.RemoveCustomVote("teleport");
     }
 
     public HookResult RunCommand(DynamicHook h)

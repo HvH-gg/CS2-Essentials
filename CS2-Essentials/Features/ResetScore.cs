@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
 
 namespace hvhgg_essentials.Features;
@@ -9,14 +10,17 @@ namespace hvhgg_essentials.Features;
 public class ResetScore
 {
     private readonly Plugin _plugin;
+    public static readonly FakeConVar<bool> hvh_resetscore = new("hvh_resetscore", "Enables the reset score feature", true, ConVarFlags.FCVAR_REPLICATED);
 
     public ResetScore(Plugin plugin)
     {
         _plugin = plugin;
+        _plugin.RegisterFakeConVars(this);
+        hvh_resetscore.Value = _plugin.Config.AllowResetScore;
     }
     
-    [ConsoleCommand("rs", "Reset score")]
-    [ConsoleCommand("resetscore", "Reset score")]
+    [ConsoleCommand("css_rs", "Reset score")]
+    [ConsoleCommand("css_resetscore", "Reset score")]
     public void OnResetScore(CCSPlayerController? player, CommandInfo inf)
     {
         if (!_plugin.Config.AllowResetScore)

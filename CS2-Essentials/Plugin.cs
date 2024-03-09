@@ -4,10 +4,14 @@ using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Core.Capabilities;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Cvars;
+using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CS2_CustomVotes.Shared;
 using hvhgg_essentials.Enums;
 using hvhgg_essentials.Features;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,27 +19,10 @@ using Microsoft.Extensions.Logging;
 
 namespace hvhgg_essentials;
 
-public partial class Cs2EssentialsConfig : BasePluginConfig
-{
-    [JsonPropertyName("RapidFireFixMethod")] public FixMethod RapidFireFixMethod { get; set; } = FixMethod.Ignore;
-    [JsonPropertyName("RapidFireReflectScale")] public float RapidFireReflectScale { get; set; } = 1f;
-    [JsonPropertyName("AllowedAwpCount")] public int AllowedAwpCount { get; set; } = -1;
-    [JsonPropertyName("AllowedScoutCount")] public int AllowedScoutCount { get; set; } = -1;
-    [JsonPropertyName("AllowedAutoSniperCount")] public int AllowedAutoSniperCount { get; set; } = -1;
-    [JsonPropertyName("UnmatchedFriendlyFire")] public bool UnmatchedFriendlyFire { get; set; } = true;
-    [JsonPropertyName("RestrictTeleport")] public bool RestrictTeleport { get; set; } = true;
-    [JsonPropertyName("AllowAdPrint")] public bool AllowAdPrint { get; set; } = true;
-    [JsonPropertyName("AllowSettingsPrint")] public bool AllowSettingsPrint { get; set; } = true;
-    [JsonPropertyName("AllowResetScore")] public bool AllowResetScore { get; set; } = true;
-    [JsonPropertyName("AllowRageQuit")] public bool AllowRageQuit { get; set; } = true;
-    [JsonPropertyName("ChatPrefix")] public string ChatPrefix { get; set; } = "[{Red}Hv{DarkRed}H{Default}.gg]";
-    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 3;
-}
-
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.1.3";
+    public override string ModuleVersion => "1.2.0";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -47,6 +34,9 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     
     public required MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr> RunCommand;
 
+    public static PluginCapability<ICustomVoteApi> CustomVotesApi { get; } = new("custom_votes:api");
+    private bool _isCustomVotesLoaded = false;
+    
     public void OnConfigParsed(Cs2EssentialsConfig config)
     {
         Config = config;
@@ -102,10 +92,32 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         UseResetScore();
         UseMisc();
         UseTeleport();
-
+        
         Console.WriteLine("[HvH.gg] Finished loading HvH.gg Essentials plugin");
     }
-    
+
+    public override void OnAllPluginsLoaded(bool hotReload)
+    {
+        base.OnAllPluginsLoaded(hotReload);
+        
+        try
+        {
+            if (CustomVotesApi.Get() is null)
+                return;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"[HvH.gg] CS2-CustomVotes plugin not found. Custom votes will not be registered.");
+            return;
+        }
+        
+        _isCustomVotesLoaded = true;
+        Console.WriteLine("[HvH.gg] Registering custom votes");
+        RapidFire.RegisterCustomVotes(this);
+        FriendlyFire.RegisterCustomVotes(this);
+        TeleportFix.RegisterCustomVotes(this);
+    }
+
     private void UseTeleport()
     {
         var teleportFix = _serviceProvider!.GetRequiredService<TeleportFix>();
@@ -198,8 +210,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     
     public override void Unload(bool hotReload)
     {
-        base.Unload(hotReload);
-
         if (_serviceProvider is null)
             return;
         
@@ -216,5 +226,15 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         var teleportFix = _serviceProvider.GetRequiredService<TeleportFix>();
         RunCommand.Unhook(teleportFix.RunCommand, HookMode.Pre);
         
+        if (!_isCustomVotesLoaded)
+            return;
+        
+        Console.WriteLine("[HvH.gg] Unregistering custom votes");
+        
+        RapidFire.UnregisterCustomVotes(this);
+        FriendlyFire.UnregisterCustomVotes(this);
+        TeleportFix.UnregisterCustomVotes(this);
+        
+        base.Unload(hotReload);
     }
 }
