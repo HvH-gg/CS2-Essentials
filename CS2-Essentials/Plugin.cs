@@ -41,6 +41,16 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     {
         Config = config;
         UpdateConfig(config);
+        
+        RapidFire.hvh_restrict_rapidfire.Value = (int) Config.RapidFireFixMethod;
+        RapidFire.hvh_rapidfire_reflect_scale.Value = Config.RapidFireReflectScale;
+        FriendlyFire.hvh_unmatched_friendlyfire.Value = Config.UnmatchedFriendlyFire;
+        TeleportFix.hvh_restrict_teleport.Value = Config.RestrictTeleport;
+        WeaponRestrict.hvh_restrict_awp.Value = Config.AllowedAwpCount;
+        WeaponRestrict.hvh_restrict_scout.Value = Config.AllowedScoutCount;
+        WeaponRestrict.hvh_restrict_auto.Value = Config.AllowedAutoSniperCount;
+        ResetScore.hvh_resetscore.Value = Config.AllowResetScore;
+        RageQuit.hvh_ragequit.Value = Config.AllowRageQuit;
     }
     
     private static void UpdateConfig<T>(T config) where T : BasePluginConfig, new()
