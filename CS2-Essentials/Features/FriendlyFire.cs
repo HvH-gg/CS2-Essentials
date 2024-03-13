@@ -53,7 +53,7 @@ public class FriendlyFire
 
     public HookResult OnTakeDamage(DynamicHook hook)
     {
-        if (!_plugin.Config.UnmatchedFriendlyFire)
+        if (!hvh_unmatched_friendlyfire.Value)
             return HookResult.Continue;
 
         try

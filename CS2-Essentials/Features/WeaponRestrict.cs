@@ -123,9 +123,9 @@ public class WeaponRestrict
     {
         return item switch
         {
-            "weapon_awp" => _plugin.Config.AllowedAwpCount,
-            "weapon_ssg08" => _plugin.Config.AllowedScoutCount,
-            "weapon_scar20" or "weapon_g3sg1" => _plugin.Config.AllowedAutoSniperCount,
+            "weapon_awp" => hvh_restrict_awp.Value,
+            "weapon_ssg08" => hvh_restrict_scout.Value,
+            "weapon_scar20" or "weapon_g3sg1" => hvh_restrict_auto.Value,
             _ => -1
         };
     }

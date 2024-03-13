@@ -24,7 +24,7 @@ public class RageQuit
     [ConsoleCommand("css_ragequit", "Rage quit")]
     public void OnRageQuit(CCSPlayerController? player, CommandInfo inf)
     {
-        if (!_plugin.Config.AllowRageQuit)
+        if (!hvh_ragequit.Value)
             return;
         
         if (!player.IsPlayer()) 

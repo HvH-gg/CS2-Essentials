@@ -23,7 +23,7 @@ public class ResetScore
     [ConsoleCommand("css_resetscore", "Reset score")]
     public void OnResetScore(CCSPlayerController? player, CommandInfo inf)
     {
-        if (!_plugin.Config.AllowResetScore)
+        if (!hvh_resetscore.Value)
             return;
         
         if (!player.IsPlayer()) 
