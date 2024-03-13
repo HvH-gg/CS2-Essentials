@@ -12,7 +12,6 @@ using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CS2_CustomVotes.Shared;
-using hvhgg_essentials.Enums;
 using hvhgg_essentials.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,7 @@ namespace hvhgg_essentials;
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.2.0";
+    public override string ModuleVersion => "1.2.1";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
