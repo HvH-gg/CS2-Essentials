@@ -49,7 +49,7 @@ public class TeleportFix
 
     public HookResult RunCommand(DynamicHook h)
     {
-        if (!_plugin.Config.RestrictTeleport)
+        if (!hvh_restrict_teleport.Value)
             return HookResult.Continue;
         
         // check if the player is a valid player

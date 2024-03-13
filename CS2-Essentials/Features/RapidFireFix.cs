@@ -94,7 +94,7 @@ public class RapidFire
             return HookResult.Continue; 
 
         // no chat message if we allow rapid fire
-        if (_plugin.Config.RapidFireFixMethod == FixMethod.Allow)
+        if (hvh_restrict_rapidfire.Value == (int)FixMethod.Allow)
             return HookResult.Continue;
             
         Console.WriteLine($"[HvH.gg] Detected rapid fire from {eventWeaponFire.Userid.PlayerName}");
@@ -130,18 +130,18 @@ public class RapidFire
             return HookResult.Continue;
             
         // set damage according to config
-        switch (_plugin.Config.RapidFireFixMethod)
+        switch (hvh_restrict_rapidfire.Value)
         {
-            case FixMethod.Allow:
+            case (int)FixMethod.Allow:
                 break;
-            case FixMethod.Ignore:
+            case (int)FixMethod.Ignore:
                 damageInfo.Damage = 0;
                 break;
-            case FixMethod.Reflect:
-            case FixMethod.ReflectSafe:
-                damageInfo.Damage *= _plugin.Config.RapidFireReflectScale;
+            case (int)FixMethod.Reflect:
+            case (int)FixMethod.ReflectSafe:
+                damageInfo.Damage *= hvh_rapidfire_reflect_scale.Value;
                 h.SetParam<CEntityInstance>(0, damageInfo.Attacker.Value);
-                if (_plugin.Config.RapidFireFixMethod == FixMethod.ReflectSafe)
+                if (hvh_restrict_rapidfire.Value == (int)FixMethod.ReflectSafe)
                     damageInfo.DamageFlags |= TakeDamageFlags_t.DFLAG_PREVENT_DEATH; //https://docs.cssharp.dev/api/CounterStrikeSharp.API.Core.TakeDamageFlags_t.html
                 break;
             default:
