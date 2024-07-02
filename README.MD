@@ -1,6 +1,6 @@
 ![Copyright ev0lve Digital](https://img.shields.io/badge/Copyright-ev0lve%20Digital-blue) ![GitHub License](https://img.shields.io/github/license/HvH-gg/CS2-Essentials) ![Issues](https://img.shields.io/github/issues/HvH-gg/CS2-Essentials) ![Downloads](https://img.shields.io/github/downloads/HvH-gg/CS2-Essentials/total) ![Stars](https://img.shields.io/github/stars/HvH-gg/CS2-Essentials)
 
-# HvH.gg CS2 Essentials (1.2.1)
+# HvH.gg CS2 Essentials (1.2.2)
 ### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) anymore.
 
 Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire**, **rapid fire** and other exploit/crash fixes.
@@ -15,7 +15,7 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 - **Linux only:** Restrict teleport/airstuck exploit (enabling this will also prevent the server crash exploit)
 
 # Requirements
-- [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=stable)
+- [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master)
 - [CounterStrikeSharp(v191)](https://github.com/roflmuffin/CounterStrikeSharp/releases)
 
 # Install
