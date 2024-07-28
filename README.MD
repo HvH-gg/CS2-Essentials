@@ -1,6 +1,6 @@
 ![Copyright ev0lve Digital](https://img.shields.io/badge/Copyright-ev0lve%20Digital-blue) ![GitHub License](https://img.shields.io/github/license/HvH-gg/CS2-Essentials) ![Issues](https://img.shields.io/github/issues/HvH-gg/CS2-Essentials) ![Downloads](https://img.shields.io/github/downloads/HvH-gg/CS2-Essentials/total) ![Stars](https://img.shields.io/github/stars/HvH-gg/CS2-Essentials)
 
-# HvH.gg CS2 Essentials (1.2.1)
+# [HvH.gg](https://hvh.gg) CS2 Essentials (1.2.1)
 ### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) anymore.
 
 Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire**, **rapid fire** and other exploit/crash fixes.
@@ -74,6 +74,7 @@ If you have [CS2-CustomVotes](https://github.com/imi-tat0r/CS2-CustomVotes) inst
 > **Warning:** Teleport restriction is needed to prevent the server crash exploit. If you enable this vote, the server will be vulnerable to the crash exploit.
 
 # Credits
+- [HvH.gg](https://hvh.gg)
 - [Metamod:Source](https://www.sourcemm.net/)
 - [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp)
 - [MagicBulletFix](https://github.com/CS2Plugins/MagicBulletFix)
