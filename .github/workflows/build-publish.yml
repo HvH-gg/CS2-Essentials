@@ -21,7 +21,7 @@ jobs:
       - name: Extract version number from README.md
         id: extract_version
         run: |
-          VERSION=$(grep -oP '(?<=# \[HvH\.gg\]\(https:\/\/hvh\.gg\) CS2 Essentials \()[0-9]+\.[0-9]+\.[0-9]+' README.md)
+          VERSION=$(grep -oP '(?<=# \[HvH\.gg\]\(https:\/\/hvh\.gg\) CS2 Essentials \()[0-9]+\.[0-9]+\.[0-9]+' README.MD)
           if [ -z "$VERSION" ]; then
             echo "No version number found in README.md. Exiting."
             exit 1
