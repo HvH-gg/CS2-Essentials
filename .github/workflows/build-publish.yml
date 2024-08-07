@@ -45,22 +45,26 @@ jobs:
         run: dotnet restore
 
       - name: Publish artifacts
-        run: |
-          dotnet build -c Release --no-restore /p:Version=${{ env.VERSION_NUMBER }}
-          dotnet pack -c Release --no-build --output ./nupkg /p:Version=${{ env.VERSION_NUMBER }}
+        run: dotnet build -c Release --no-restore /p:Version=${{ env.VERSION_NUMBER }}
           
       - name: Check contents of bin/Release directory
         run: |
           echo "Listing contents of CS2-Essentials/bin/Release/net8.0/"
           ls -la CS2-Essentials/bin/Release/net8.0/
 
+      - name: Create necessary directory structure and copy files
+        run: |
+          mkdir -p release/addons/counterstrikesharp/configs/plugins/CS2-Essentials
+          mkdir -p release/addons/counterstrikesharp/plugins/CS2-Essentials
+          mkdir -p release/addons/counterstrikesharp/gamedata/CS2-Essentials
+          cp CS2-Essentials.json.gamedata release/addons/counterstrikesharp/gamedata/CS2-Essentials.json
+          cp CS2-Essentials.json.config.example release/addons/counterstrikesharp/configs/plugins/CS2-Essentials/CS2-Essentials.json
+          cp -r CS2-Essentials/bin/Release/net8.0/* release/addons/counterstrikesharp/plugins/CS2-Essentials/
+
       - name: Create a ZIP file with binaries
         run: |
-          mkdir release
-          cp -r CS2-Essentials/bin/Release/net8.0/* ./release/
-          ls -la ./release
           cd release
-          zip -r ../CS2-Essentials-${{ env.VERSION_NUMBER }}-${{ env.GITHUB_SHA_SHORT }}.zip *
+          zip -r ../CS2-Essentials-${{ env.VERSION_NUMBER }}-${{ env.GITHUB_SHA_SHORT }}.zip addons
 
       - name: Create GitHub Release
         id: create_release
