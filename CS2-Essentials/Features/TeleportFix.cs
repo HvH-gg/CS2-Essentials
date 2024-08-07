@@ -53,7 +53,7 @@ public class TeleportFix
             return HookResult.Continue;
         
         // check if the player is a valid player
-        var player = h.GetParam<CCSPlayer_MovementServices>(0).Pawn.Value.Controller.Value!.As<CCSPlayerController>();
+        var player = h.GetParam<CCSPlayer_MovementServices>(0).Pawn.Value.Controller.Value?.As<CCSPlayerController>();
         if (!player.IsPlayer())
             return HookResult.Continue;
         
