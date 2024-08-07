@@ -1,0 +1,15 @@
+{
+  "RapidFireFixMethod": 1,
+  "RapidFireReflectScale": 1,
+  "AllowedAwpCount": -1,
+  "AllowedScoutCount": -1,
+  "AllowedAutoSniperCount": -1,
+  "UnmatchedFriendlyFire": true,
+  "RestrictTeleport": true,
+  "AllowAdPrint": true,
+  "AllowSettingsPrint": true,
+  "AllowResetScore": true,
+  "AllowRageQuit": true,
+  "ChatPrefix": "[{Red}Hv{DarkRed}H{Default}.gg]",
+  "ConfigVersion": 3
+}
