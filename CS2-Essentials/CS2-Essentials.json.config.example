@@ -11,5 +11,11 @@
   "AllowResetScore": true,
   "AllowRageQuit": true,
   "ChatPrefix": "[{Red}Hv{DarkRed}H{Default}.gg]",
-  "ConfigVersion": 3
+  "CustomVoteSettings": {
+    "FriendlyFireVote": true,
+    "TeleportFixVote": true,
+    "RapidFireVote": "full",
+	"Style":"center"
+  },
+  "ConfigVersion": 4
 }
