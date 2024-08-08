@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'README.MD'
+      - '.github/workflows/**'
 
 jobs:
   build:
@@ -56,7 +59,7 @@ jobs:
         run: |
           mkdir -p release/addons/counterstrikesharp/configs/plugins/CS2-Essentials
           mkdir -p release/addons/counterstrikesharp/plugins/CS2-Essentials
-          mkdir -p release/addons/counterstrikesharp/gamedata/CS2-Essentials
+          mkdir -p release/addons/counterstrikesharp/gamedata
           cp CS2-Essentials/CS2-Essentials.json.gamedata release/addons/counterstrikesharp/gamedata/CS2-Essentials.json
           cp CS2-Essentials/CS2-Essentials.json.config.example release/addons/counterstrikesharp/configs/plugins/CS2-Essentials/CS2-Essentials.json
           cp -r CS2-Essentials/bin/Release/net8.0/* release/addons/counterstrikesharp/plugins/CS2-Essentials/
