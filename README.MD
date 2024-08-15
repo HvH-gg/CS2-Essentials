@@ -27,6 +27,7 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 4. Restart your server
 
 # Config
+To reload your config after editing, use `hvh_cfg_~~~~reload` in the server console.
 ```json
 {
    "RapidFireFixMethod": 1, // 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive

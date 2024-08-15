@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2_CustomVotes.Shared.Models;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 using hvhgg_essentials.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -75,7 +77,7 @@ public class TeleportFix
         
         // print a warning to all players
         var feature = player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
-        Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
+        Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
         _teleportBlockWarnings[player.Index] = Server.CurrentTime;
 
         return HookResult.Changed;

@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 
 namespace hvhgg_essentials.Features;
 
@@ -62,7 +64,7 @@ public class WeaponRestrict
         if (!_lastWeaponRestrictPrint.TryGetValue(player.Pawn.Index, out var lastPrintTime) ||
             lastPrintTime + 10 <= Server.CurrentTime)
         {
-            player.PrintToChat($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
+            player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
             
             _lastWeaponRestrictPrint[player.Pawn.Index] = Server.CurrentTime;
         }
@@ -105,7 +107,7 @@ public class WeaponRestrict
         if (!willExceedLimits)
             return HookResult.Continue;
 
-        player.PrintToChat($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
+        player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
 
         RefundItem(player, item);
 
