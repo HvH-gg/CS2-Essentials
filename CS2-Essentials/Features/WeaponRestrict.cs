@@ -94,7 +94,7 @@ public class WeaponRestrict
             return HookResult.Continue;
 
         // not exceeding limits
-        var weaponsInTeam = GetWeaponCountInTeam(item, player.Team);
+        var weaponsInTeam = GetWeaponCountInTeam(item, player!.Team);
         var allowedWeapons = GetAllowedWeaponCount(item);
 
         var willExceedLimits = allowedWeapons != -1 && weaponsInTeam + 1 > allowedWeapons;

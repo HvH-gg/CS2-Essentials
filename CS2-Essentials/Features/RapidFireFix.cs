@@ -73,7 +73,7 @@ public class RapidFire
         if (!eventWeaponFire.Userid.IsPlayer())
             return HookResult.Continue;
         
-        var firedWeapon = eventWeaponFire.Userid.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
+        var firedWeapon = eventWeaponFire.Userid!.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
         var weaponData = firedWeapon?.GetVData<CCSWeaponBaseVData>();
         
         var index = eventWeaponFire.Userid.Pawn.Index;
