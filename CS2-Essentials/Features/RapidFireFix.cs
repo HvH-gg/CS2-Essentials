@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2_CustomVotes.Shared.Models;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 using hvhgg_essentials.Enums;
 
 namespace hvhgg_essentials.Features;
@@ -111,7 +113,7 @@ public class RapidFire
             return HookResult.Continue;
             
         // warn player
-        Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{eventWeaponFire.Userid.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}rapid fire{ChatColors.Default}!");
+        Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{eventWeaponFire.Userid.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}rapid fire{ChatColors.Default}!");
         _rapidFireBlockWarnings[index] = Server.CurrentTime;
 
         return HookResult.Continue;

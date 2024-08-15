@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 using hvhgg_essentials.Enums;
 
 namespace hvhgg_essentials.Features;
@@ -30,16 +32,7 @@ public class Misc
     [CommandHelper(minArgs: 0, whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     public void OnReloadConfigCommand(CCSPlayerController? player, CommandInfo info)
     {
-        var config = File.ReadAllText(Plugin.CfgPath);
-        try
-        {
-            _plugin.Config = JsonSerializer.Deserialize<Cs2EssentialsConfig>(config, new JsonSerializerOptions() { ReadCommentHandling = JsonCommentHandling.Skip })!;
-            info.ReplyToCommand($"{(player == null ? "HvH.gg" : Helpers.FormatMessage(_plugin.Config.ChatPrefix))} Config reloaded successfully");
-        }
-        catch (Exception e)
-        {
-            info.ReplyToCommand($"{(player == null ? "HvH.gg" : Helpers.FormatMessage(_plugin.Config.ChatPrefix))} Failed to reload config: {e.Message}");
-        }
+        _plugin.OnConfigParsed(new Cs2EssentialsConfig().Reload());
     }
     
     public void AnnounceRules(CCSPlayerController? player, bool force = false)
@@ -96,11 +89,11 @@ public class Misc
 
             player.PrintToChat(" ");
             player.PrintToChat(
-                $"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Type {ChatColors.Red}!settings{ChatColors.Default} to see these settings again");
+                $"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Type {ChatColors.Red}!settings{ChatColors.Default} to see these settings again");
         }
         
         if (_plugin.Config.AllowAdPrint)
-            player.PrintToChat(Helpers.FormatMessage("powered by {HvHgg}"));
+            player.PrintToChat(ChatUtils.FormatMessage("powered by {HvHgg}"));
         
     }
 }

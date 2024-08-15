@@ -12,6 +12,7 @@ using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CS2_CustomVotes.Shared;
+using CSSharpUtils.Extensions;
 using hvhgg_essentials.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,9 +29,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     
     private ServiceProvider? _serviceProvider = null;
     
-    private static readonly string AssemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
-    public static readonly string CfgPath = $"{Server.GameDirectory}/csgo/addons/counterstrikesharp/configs/plugins/{AssemblyName}/{AssemblyName}.json";
-    
     public required MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr> RunCommand;
 
     public static PluginCapability<ICustomVoteApi> CustomVotesApi { get; } = new("custom_votes:api");
@@ -39,7 +37,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
     public void OnConfigParsed(Cs2EssentialsConfig config)
     {
         Config = config;
-        UpdateConfig(config);
+        config.Update();
         
         RapidFire.hvh_restrict_rapidfire.Value = (int) Config.RapidFireFixMethod;
         RapidFire.hvh_rapidfire_reflect_scale.Value = Config.RapidFireReflectScale;
@@ -50,23 +48,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         WeaponRestrict.hvh_restrict_auto.Value = Config.AllowedAutoSniperCount;
         ResetScore.hvh_resetscore.Value = Config.AllowResetScore;
         RageQuit.hvh_ragequit.Value = Config.AllowRageQuit;
-    }
-    
-    private static void UpdateConfig<T>(T config) where T : BasePluginConfig, new()
-    {
-        // get current config version
-        var newCfgVersion = new T().Version;
-        
-        // loaded config is up to date
-        if (config.Version == newCfgVersion)
-            return;
-        
-        // update the version
-        config.Version = newCfgVersion;
-        
-        // serialize the updated config back to json
-        var updatedJsonContent = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(CfgPath, updatedJsonContent);
     }
 
     public override void Load(bool hotReload)
@@ -198,23 +179,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Hook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
         
         Console.WriteLine("[HvH.gg] Finished registering weapon restriction listeners");
-    }
-    
-    [ConsoleCommand("css_reload_cfg", "Reload the config in the current session without restarting the server")]
-    [RequiresPermissions("@css/generic")]
-    [CommandHelper(minArgs: 0, whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
-    public void OnReloadConfigCommand(CCSPlayerController? player, CommandInfo info)
-    {
-        var config = File.ReadAllText(CfgPath);
-        try
-        {
-            OnConfigParsed(JsonSerializer.Deserialize<Cs2EssentialsConfig>(config,
-                new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip })!);
-        }
-        catch (Exception e)
-        {
-            info.ReplyToCommand($"[HvH.gg] Failed to reload config: {e.Message}");
-        }
     }
     
     public override void Unload(bool hotReload)

@@ -4,6 +4,8 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 
 namespace hvhgg_essentials.Features;
 
@@ -34,7 +36,7 @@ public class ResetScore
         if (player is { Score: 0, MVPs: 0 } && 
             stats is { Kills: 0, HeadShotKills: 0, Deaths: 0, Assists: 0, UtilityDamage: 0, Damage: 0, Objective: 0 })
         {
-            player.PrintToChat($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Your stats are already 0.");
+            player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Your stats are already 0.");
             return;
         }
         
@@ -52,6 +54,6 @@ public class ResetScore
         Utilities.SetStateChanged(player, "CCSPlayerController", "m_iMVPs");
         Utilities.SetStateChanged(player, "CCSPlayerController", "m_iScore");
         
-        Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} has reset their stats!");
+        Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} has reset their stats!");
     }
 }

@@ -5,6 +5,8 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Utils;
+using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
 
 namespace hvhgg_essentials.Features;
 
@@ -32,6 +34,6 @@ public class RageQuit
         
         player!.Kick("Rage quit");
         
-        Server.PrintToChatAll($"{Helpers.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player!.PlayerName}{ChatColors.Default} has rage quit!");
+        Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player!.PlayerName}{ChatColors.Default} has rage quit!");
     }
 }
