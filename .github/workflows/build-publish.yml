@@ -47,13 +47,18 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Publish artifacts
+      - name: Build
         run: dotnet build -c Release --no-restore /p:Version=${{ env.VERSION_NUMBER }}
-          
-      - name: Check contents of bin/Release directory
+
+      - name: Copy CSSharpUtils.dll
         run: |
-          echo "Listing contents of CS2-Essentials/bin/Release/net8.0/"
-          ls -la CS2-Essentials/bin/Release/net8.0/
+          mkdir -p release/addons/counterstrikesharp/plugins/CS2-Essentials
+          CSSharpUtilsDllPath=$(find ~/.nuget/packages/cssharputils/ -name "CSSharpUtils.dll" | head -n 1)
+          if [ -z "$CSSharpUtilsDllPath" ]; then
+            echo "CSSharpUtils.dll not found. Exiting."
+            exit 1
+          fi
+          cp "$CSSharpUtilsDllPath" release/addons/counterstrikesharp/plugins/CS2-Essentials/
 
       - name: Create necessary directory structure and copy files
         run: |

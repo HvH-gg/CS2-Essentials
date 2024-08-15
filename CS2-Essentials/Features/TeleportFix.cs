@@ -69,7 +69,7 @@ public class TeleportFix
         viewAngles.Fix();
 
         // not warned yet or last warning was more than 3 seconds ago
-        if (_teleportBlockWarnings.TryGetValue(player.Index, out var lastWarningTime) &&
+        if (_teleportBlockWarnings.TryGetValue(player!.Index, out var lastWarningTime) &&
             !(lastWarningTime + 3 <= Server.CurrentTime)) 
             return HookResult.Changed;
         
