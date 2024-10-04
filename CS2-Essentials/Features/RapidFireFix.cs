@@ -92,7 +92,8 @@ public class RapidFire
         var possibleAttackDiff = (weaponData?.CycleTime.Values[0] * 64 ?? 0) - 1;
 
         // this is ghetto but should work for now
-        if (shotTickDiff > possibleAttackDiff)
+        if (shotTickDiff > possibleAttackDiff || 
+            firedWeapon?.DesignerName == "weapon_revolver")
             return HookResult.Continue; 
 
         // no chat message if we allow rapid fire
