@@ -1,14 +1,5 @@
-﻿using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Attributes.Registration;
+﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Capabilities;
-using CounterStrikeSharp.API.Modules.Admin;
-using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Cvars;
-using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CS2_CustomVotes.Shared;
@@ -22,17 +13,17 @@ namespace hvhgg_essentials;
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.2.1";
+    public override string ModuleVersion => "1.2.6";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
     
-    private ServiceProvider? _serviceProvider = null;
+    private ServiceProvider? _serviceProvider;
     
     public required MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr> RunCommand;
 
     public static PluginCapability<ICustomVoteApi> CustomVotesApi { get; } = new("custom_votes:api");
-    private bool _isCustomVotesLoaded = false;
+    private bool _isCustomVotesLoaded;
     
     public void OnConfigParsed(Cs2EssentialsConfig config)
     {
@@ -95,9 +86,9 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
             if (CustomVotesApi.Get() is null)
                 return;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine($"[HvH.gg] CS2-CustomVotes plugin not found. Custom votes will not be registered.");
+            Console.WriteLine("[HvH.gg] CS2-CustomVotes plugin not found. Custom votes will not be registered.");
             return;
         }
         
@@ -114,7 +105,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         Console.WriteLine("[HvH.gg] Hooking run command");
         
-        RunCommand = new(GameData.GetSignature("RunCommand"));
+        RunCommand = new MemoryFunctionVoid<CCSPlayer_MovementServices, IntPtr>(GameData.GetSignature("RunCommand"));
         RunCommand.Hook(teleportFix.RunCommand, HookMode.Pre);
     }
     private void UseMisc()
@@ -124,7 +115,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         var misc = _serviceProvider!.GetRequiredService<Misc>();
         RegisterConsoleCommandAttributeHandlers(misc);
         
-        RegisterEventHandler<EventPlayerSpawn>((eventPlayerSpawn, info) =>
+        RegisterEventHandler<EventPlayerSpawn>((eventPlayerSpawn, _) =>
         {
             misc.AnnounceRules(eventPlayerSpawn.Userid);
             
