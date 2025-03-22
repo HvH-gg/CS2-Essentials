@@ -82,7 +82,7 @@ If you have [CS2-CustomVotes](https://github.com/imi-tat0r/CS2-CustomVotes) inst
 
 # Credits
 - [HvH.gg](https://hvh.gg)
-- [FusionHVH)](https://fusionhvh.ru)
+- [FusionHVH](https://fusionhvh.ru)
 - [Metamod:Source](https://www.sourcemm.net/)
 - [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp)
 - [MagicBulletFix](https://github.com/CS2Plugins/MagicBulletFix)
