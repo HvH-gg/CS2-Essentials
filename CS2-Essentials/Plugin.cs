@@ -13,7 +13,7 @@ namespace hvhgg_essentials;
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.2.6";
+    public override string ModuleVersion => "1.3.0";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -31,13 +31,16 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         config.Update();
         
         RapidFire.hvh_restrict_rapidfire.Value = (int) Config.RapidFireFixMethod;
+        RapidFire.hvh_rapidfire_print_message.Value = Config.RapidFirePrintMessage;
         RapidFire.hvh_rapidfire_reflect_scale.Value = Config.RapidFireReflectScale;
         FriendlyFire.hvh_unmatched_friendlyfire.Value = Config.UnmatchedFriendlyFire;
         TeleportFix.hvh_restrict_teleport.Value = Config.RestrictTeleport;
+        TeleportFix.hvh_teleport_print_message.Value = Config.TeleportPrintMessage;
         WeaponRestrict.hvh_restrict_awp.Value = Config.AllowedAwpCount;
         WeaponRestrict.hvh_restrict_scout.Value = Config.AllowedScoutCount;
         WeaponRestrict.hvh_restrict_auto.Value = Config.AllowedAutoSniperCount;
         ResetScore.hvh_resetscore.Value = Config.AllowResetScore;
+        MetaCommandsBlocker.hvh_restrict_meta_commands.Value = Config.RestrictMetaCommands;
         RageQuit.hvh_ragequit.Value = Config.AllowRageQuit;
     }
 
@@ -53,7 +56,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         {
             options.AddConsole();
         });
-        
+
         services.AddSingleton(this);
         services.AddSingleton<RageQuit>();
         services.AddSingleton<ResetScore>();
@@ -64,8 +67,9 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         services.AddSingleton<Misc>();
         
         _serviceProvider = services.BuildServiceProvider();
-        
+
         // register features
+        UseMetaCommandsBlocker();
         UseWeaponRestrict();
         UseRapidFireRestrict();
         UseFriendlyFireRestrict();
@@ -124,6 +128,17 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         
         Console.WriteLine("[HvH.gg] Finished registering misc commands");
     }
+    private void UseMetaCommandsBlocker()
+    {
+        Console.WriteLine("[HvH.gg] Register meta commands blocker");
+
+        var metaCommandsBlocker = _serviceProvider!.GetRequiredService<MetaCommandsBlocker>();
+        AddCommandListener("sm", metaCommandsBlocker.CommandListener_BlockOutput);
+        AddCommandListener("meta", metaCommandsBlocker.CommandListener_BlockOutput);
+        AddCommandListener("css_plugins", metaCommandsBlocker.CommandListener_BlockOutput);
+
+        Console.WriteLine("[HvH.gg] Finished registering meta commands blocker");
+    }
     private void UseResetScore()
     {
         Console.WriteLine("[HvH.gg] Register reset score command");
@@ -156,6 +171,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         Console.WriteLine("[HvH.gg] Register rapid fire listeners");
         
         var rapidFire = _serviceProvider!.GetRequiredService<RapidFire>();
+        RegisterEventHandler<EventBulletImpact>(rapidFire.OnBulletImpact, HookMode.Pre);
         RegisterEventHandler<EventWeaponFire>(rapidFire.OnWeaponFire);
         VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Hook(rapidFire.OnTakeDamage, HookMode.Pre);
         

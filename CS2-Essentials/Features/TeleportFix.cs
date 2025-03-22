@@ -17,12 +17,14 @@ public class TeleportFix
     private readonly Plugin _plugin;
     private readonly Dictionary<uint, float> _teleportBlockWarnings = new();
     public static readonly FakeConVar<bool> hvh_restrict_teleport = new("hvh_restrict_teleport", "Restricts players from teleporting/airstucking and crashing the server", true, ConVarFlags.FCVAR_REPLICATED);
+    public static readonly FakeConVar<bool> hvh_teleport_print_message = new("hvh_teleport_print_message", "Print in chat message about using teleporting/airstucking", true, ConVarFlags.FCVAR_REPLICATED);
 
     public TeleportFix(Plugin plugin)
     {
         _plugin = plugin;
         _plugin.RegisterFakeConVars(this);
         hvh_restrict_teleport.Value = _plugin.Config.RestrictTeleport;
+        hvh_teleport_print_message.Value = _plugin.Config.TeleportPrintMessage;
     }
     
     public static void RegisterCustomVotes(Plugin plugin)
@@ -70,15 +72,19 @@ public class TeleportFix
         // fix the view angles (prevents the player from using teleport or airstuck)
         viewAngles.Fix();
 
-        // not warned yet or last warning was more than 3 seconds ago
-        if (_teleportBlockWarnings.TryGetValue(player!.Index, out var lastWarningTime) &&
-            !(lastWarningTime + 3 <= Server.CurrentTime)) 
-            return HookResult.Changed;
-        
-        // print a warning to all players
-        var feature = player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
-        Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
-        _teleportBlockWarnings[player.Index] = Server.CurrentTime;
+        // if allow to print
+        if (hvh_teleport_print_message.Value)
+        {
+            // not warned yet or last warning was more than 3 seconds ago
+            if (_teleportBlockWarnings.TryGetValue(player!.Index, out var lastWarningTime) &&
+                !(lastWarningTime + 3 <= Server.CurrentTime))
+                return HookResult.Changed;
+
+            // print a warning to all players
+            var feature = player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
+            Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
+            _teleportBlockWarnings[player.Index] = Server.CurrentTime;
+        }
 
         return HookResult.Changed;
     }

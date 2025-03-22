@@ -20,6 +20,10 @@ public static class QAngleExtensions
     {
         angle.FixInfinity();
         angle.FixNaN();
+
+        if (angle.IsReasonable())
+            angle.Normalize();
+
         angle.Clamp();
     }
 
@@ -45,9 +49,15 @@ public static class QAngleExtensions
 
     private static void Clamp(this CounterStrikeSharp.API.Modules.Utils.QAngle angle)
     {
-        angle.X = Math.Clamp(angle.X, -89.0f, 89.0f);
+        angle.X = Math.Clamp(angle.X, -179.0f, 179.0f);
         angle.Y = Math.Clamp(angle.Y, -180.0f, 180.0f);
-        angle.Z = 0;
+    }
+
+    private static void Normalize(this CounterStrikeSharp.API.Modules.Utils.QAngle angle)
+    {
+        angle.X = (angle.X + 180.0f) % 360.0f - 180.0f;
+        angle.Y = (angle.Y + 180.0f) % 360.0f - 180.0f;
+        angle.Z = (angle.Z + 180.0f) % 360.0f - 180.0f;
     }
 
     private static bool IsReasonable(this CounterStrikeSharp.API.Modules.Utils.QAngle q )

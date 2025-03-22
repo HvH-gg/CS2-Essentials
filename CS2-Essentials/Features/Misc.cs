@@ -48,20 +48,20 @@ public class Misc
 
         if (_plugin.Config.AllowSettingsPrint)
         {
-            player.PrintToChat("Ruleset:");
+            player.PrintToChat("Server settings:");
             player.PrintToChat(
-                $"unmatched.{ChatColors.Orange}gg{ChatColors.Default} friendly fire: {(_plugin.Config.UnmatchedFriendlyFire ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
+                $"Grenades only friendly fire: {(_plugin.Config.UnmatchedFriendlyFire ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
             player.PrintToChat(
-                $"Teleport/Airstuck: {(!_plugin.Config.RestrictTeleport ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
+                $"Teleport/Airstuck/FakePitch: {(!_plugin.Config.RestrictTeleport ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
             player.PrintToChat(
-                $"Rapid fire: {(_plugin.Config.RapidFireFixMethod == FixMethod.Allow ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
+                $"RapidFire/DoubleTap: {(_plugin.Config.RapidFireFixMethod == FixMethod.Allow ? $"{ChatColors.Lime}enabled" : $"{ChatColors.Red}disabled")}");
 
             switch (_plugin.Config.RapidFireFixMethod)
             {
                 case FixMethod.Allow:
                     break;
                 case FixMethod.Ignore:
-                    player.PrintToChat($"Method: {ChatColors.Red}block damage");
+                    player.PrintToChat($"Method: {ChatColors.Red}blocking shot registration");
                     break;
                 case FixMethod.Reflect:
                     player.PrintToChat(
@@ -69,7 +69,7 @@ public class Misc
                     break;
                 case FixMethod.ReflectSafe:
                     player.PrintToChat(
-                        $"Method: {ChatColors.Red}reflect damage{ChatColors.Default} at {ChatColors.Orange}{_plugin.Config.RapidFireReflectScale}x{ChatColors.Default} and prevent death");
+                        $"Method: {ChatColors.Red}reflect damage{ChatColors.Default} at {ChatColors.Orange}{_plugin.Config.RapidFireReflectScale}x{ChatColors.Default} and prevent death (1 hp)");
                     break;
                 default:
                     break;
@@ -93,7 +93,7 @@ public class Misc
         }
         
         if (_plugin.Config.AllowAdPrint)
-            player.PrintToChat(ChatUtils.FormatMessage("powered by {HvHgg}"));
+            player.PrintToChat(ChatUtils.FormatMessage("powered by {HvH.gg}"));
         
     }
 }

@@ -15,6 +15,8 @@ public class Cs2CustomVoteSettings
 public partial class Cs2EssentialsConfig : BasePluginConfig
 {
     [JsonPropertyName("RapidFireFixMethod")] public FixMethod RapidFireFixMethod { get; set; } = FixMethod.Ignore;
+    [JsonPropertyName("RapidFirePrintMessage")] public bool RapidFirePrintMessage { get; set; } = true;
+    [JsonPropertyName("TeleportPrintMessage")] public bool TeleportPrintMessage { get; set; } = true;
     [JsonPropertyName("RapidFireReflectScale")] public float RapidFireReflectScale { get; set; } = 1f;
     [JsonPropertyName("AllowedAwpCount")] public int AllowedAwpCount { get; set; } = -1;
     [JsonPropertyName("AllowedScoutCount")] public int AllowedScoutCount { get; set; } = -1;
@@ -24,8 +26,9 @@ public partial class Cs2EssentialsConfig : BasePluginConfig
     [JsonPropertyName("AllowAdPrint")] public bool AllowAdPrint { get; set; } = true;
     [JsonPropertyName("AllowSettingsPrint")] public bool AllowSettingsPrint { get; set; } = true;
     [JsonPropertyName("AllowResetScore")] public bool AllowResetScore { get; set; } = true;
+    [JsonPropertyName("RestrictMetaCommands")] public bool RestrictMetaCommands { get; set; } = true;
     [JsonPropertyName("AllowRageQuit")] public bool AllowRageQuit { get; set; } = true;
     [JsonPropertyName("ChatPrefix")] public string ChatPrefix { get; set; } = "[{Red}Hv{DarkRed}H{Default}.gg]";
     [JsonPropertyName("CustomVoteSettings")] public Cs2CustomVoteSettings CustomVoteSettings { get; set; } = new();
-    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 4;
+    [JsonPropertyName("ConfigVersion")] public override int Version { get; set; } = 5;
 }
