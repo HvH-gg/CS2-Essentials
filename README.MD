@@ -1,9 +1,9 @@
 ![Copyright ev0lve Digital](https://img.shields.io/badge/Copyright-ev0lve%20Digital-blue) ![GitHub License](https://img.shields.io/github/license/HvH-gg/CS2-Essentials) ![Issues](https://img.shields.io/github/issues/HvH-gg/CS2-Essentials) ![Downloads](https://img.shields.io/github/downloads/HvH-gg/CS2-Essentials/total) ![Stars](https://img.shields.io/github/stars/HvH-gg/CS2-Essentials)
 
-# [HvH.gg](https://hvh.gg) CS2 Essentials (1.2.6)
-### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) anymore.
+# [HvH.gg](https://hvh.gg) CS2 Essentials (1.3.0)
+### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) and [TeleportFix](https://github.com/HvH-gg/TeleportFix) anymore.
 
-Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire**, **rapid fire** and other exploit/crash fixes.
+Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire**, **rapid fire** **meta/sm/cssharp commands** and other exploit/crash fixes.
 
 # Features
 - Custom Vote support (requires [CS2-CustomVotes](https://github.com/imi-tat0r/CS2-CustomVotes))
@@ -11,8 +11,9 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 - Rage quit `!rq`
 - Restrict weapons (awp, scout, autosniper)
 - Restrict friendly fire (default, only utility damage)
-- Restrict rapid fire (0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive)
-- **Linux only:** Restrict teleport/airstuck exploit (enabling this will also prevent the server crash exploit)
+- Restrict rapid fire (0 allows rapid fire, 1 blocks rapid fire from registering shot, 2 reflects damage scaled, 3 reflects damage but keeps the player alive)
+- Restrict players from access MetaMod, CSSharp and SM commands in console.
+- **Linux only:** Restrict teleport/airstuck/fake-pitch exploits (enabling this will also prevent the server crash exploit)
 
 # Requirements
 - [Metamod:Source](https://www.sourcemm.net/downloads.php/?branch=master)
@@ -31,6 +32,8 @@ To reload your config after editing, use `hvh_cfg_~~~~reload` in the server cons
 ```json
 {
    "RapidFireFixMethod": 1, // 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive
+   "RapidFirePrintMessage": true, // Allow to print message to all players about someone using rapid fire (shows only when reflect type selected)
+   "TeleportPrintMessage": true, // Allow to print message to all players about someone using teleport/airstuck/fakepitch exploits
    "RapidFireReflectScale": 1, // damage reflect percentage (0.0 - 1.0)
    "AllowedAwpCount": -1, // how many awps are allowed per team (0 for none, -1 for unlimited)
    "AllowedScoutCount": -1, // how many scouts are allowed per team (0 for none, -1 for unlimited)
@@ -40,6 +43,7 @@ To reload your config after editing, use `hvh_cfg_~~~~reload` in the server cons
    "AllowAdPrint": true, // if true, players will see a "powered by HvH.gg" ad in the chat with the settings print
    "AllowSettingsPrint": true, // if true, players will see an overview of the server settings with `!settings` and on spawn
    "AllowResetScore": true, // if true, players will be able to reset their score with `!rs`
+   "RestrictMetaCommands": true, // if true, players will NOT be able to get meta/sm/cssharp commands execute
    "AllowRageQuit": true, // if true, players will be able to rage quit with `!rq`
    "ChatPrefix": "[{Red}Hv{DarkRed}H{Default}.gg]", // chat prefix for plugin messages
    "CustomVoteSettings": { // settings for custom votes (requires CS2-CustomVotes)
@@ -48,7 +52,7 @@ To reload your config after editing, use `hvh_cfg_~~~~reload` in the server cons
       "RapidFireVote": "full", // You can set the style (`off`, `simple`, `full`) for the rapid fire vote
       "Style":"center" // You can set the style (`center` or `chat`) for the vote menu (might be overridden by CS2-CustomVotes settings)
    },
-   "ConfigVersion": 4 // do not change
+   "ConfigVersion": 5 // do not change, config version
 }
 ```
 
@@ -56,7 +60,9 @@ To reload your config after editing, use `hvh_cfg_~~~~reload` in the server cons
 Instead of editing the config file, you can also use the following ConVars to change certain settings **on the fly**. These changes will **NOT** be saved to the config file and will be reset after a server restart.
 - `hvh_restrict_rapidfire` 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive
 - `hvh_rapidfire_reflect_scale` damage reflect percentage, 0.0 - 1.0
+- `hvh_rapidfire_print_message` if true, then all players will see in chat if someone using rapidfire (shows only when reflect type selected)
 - `hvh_restrict_teleport` if true, the teleport and airstuck exploit will be restricted. This will also prevent the server crash exploit
+- `hvh_teleport_print_message` if true, then all players will see in chat if someone using teleport/airstuck/fakepitch exploits
 - `hvh_restrict_awp` how many awps are allowed per team, 0 for none, -1 for unlimited
 - `hvh_restrict_scout` how many scouts are allowed per team, 0 for none, -1 for unlimited
 - `hvh_restrict_auto` how many auto snipers are allowed per team, 0 for none, -1 for unlimited
@@ -76,9 +82,12 @@ If you have [CS2-CustomVotes](https://github.com/imi-tat0r/CS2-CustomVotes) inst
 
 # Credits
 - [HvH.gg](https://hvh.gg)
+- [FusionHVH)](https://fusionhvh.ru)
 - [Metamod:Source](https://www.sourcemm.net/)
 - [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp)
 - [MagicBulletFix](https://github.com/CS2Plugins/MagicBulletFix)
+- [RapidFireFix](https://github.com/CS2Plugins/RapidFireFix)
+- [MetaCommandsBlocker](https://github.com/ManifestManah/PluginsCommandsBlocker)
 
 # Buy us a coffee
-If you like our work, consider [buying us a coffee](https://hvh.gg/plugins).
+If you like our work, consider [buying us a coffee](https://hvh.gg/plugins) or play on our servers [FusionHVH](https://fusionhvh.ru).
