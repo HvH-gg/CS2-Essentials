@@ -3,16 +3,6 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
-using CounterStrikeSharp.API.Modules.Cvars.Validators;
-using CounterStrikeSharp.API.Modules.Entities;
-using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
-using CounterStrikeSharp.API.Modules.Utils;
-using CS2_CustomVotes.Shared.Models;
-using CSSharpUtils.Extensions;
-using CSSharpUtils.Utils;
-using hvhgg_essentials.Enums;
-using System;
-using System.Numerics;
 
 namespace hvhgg_essentials.Features;
 

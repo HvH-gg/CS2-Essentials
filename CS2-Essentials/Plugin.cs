@@ -65,6 +65,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         services.AddSingleton<FriendlyFire>();
         services.AddSingleton<TeleportFix>();
         services.AddSingleton<Misc>();
+        services.AddSingleton<MetaCommandsBlocker>();
         
         _serviceProvider = services.BuildServiceProvider();
 
