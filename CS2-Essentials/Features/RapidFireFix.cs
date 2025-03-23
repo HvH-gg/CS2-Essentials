@@ -71,6 +71,7 @@ public class RapidFire
     {
         Plugin.CustomVotesApi.Get()?.RemoveCustomVote("rapidfire");
     }
+
     public HookResult OnBulletImpact(EventBulletImpact evt, GameEventInfo info)
     {
         if (hvh_restrict_rapidfire.Value != (int)FixMethod.Ignore)
@@ -125,7 +126,6 @@ public class RapidFire
         firedWeapon?.DesignerName == "weapon_revolver")
             return HookResult.Continue;
 
-            
         Console.WriteLine($"[HvH.gg] Detected rapid fire from {eventWeaponFire.Userid.PlayerName}");
             
         if (_rapidFireBlockUserIds.Count == 0)

@@ -1,8 +1,10 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
+using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using CounterStrikeSharp.API.Modules.Utils;
 using CSSharpUtils.Extensions;
@@ -25,6 +27,10 @@ public class WeaponRestrict
     public static readonly FakeConVar<int> hvh_restrict_scout = new("hvh_restrict_scout", "Restrict scout to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
     public static readonly FakeConVar<int> hvh_restrict_auto = new("hvh_restrict_auto", "Restrict autosniper to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
 
+    private bool checkWarmup;
+    public bool InWarmup = false;
+    private string AllowedFlag;
+
     public WeaponRestrict(Plugin plugin)
     {
         _plugin = plugin;
@@ -32,86 +38,69 @@ public class WeaponRestrict
         hvh_restrict_awp.Value = _plugin.Config.AllowedAwpCount;
         hvh_restrict_scout.Value = _plugin.Config.AllowedScoutCount;
         hvh_restrict_auto.Value = _plugin.Config.AllowedAutoSniperCount;
+        checkWarmup = _plugin.Config.AllowAllWeaponsOnWarmup;
+        AllowedFlag = _plugin.Config.AllowWeaponsForFlag is string && _plugin.Config.AllowWeaponsForFlag.Length > 0 
+            ? _plugin.Config.AllowWeaponsForFlag 
+            : "@css/restrict";
     }
-    
-    public HookResult OnWeaponCanUse(DynamicHook hook)
+
+    public HookResult OnWeaponCanAcquire(DynamicHook hook)
     {
-        var weaponServices = hook.GetParam<CCSPlayer_WeaponServices>(0);
-        var weapon = hook.GetParam<CBasePlayerWeapon>(1);
-
-        var player = new CCSPlayerController(weaponServices.Pawn.Value.Controller.Value!.Handle);
-
-        // not a player
-        if (!player.IsPlayer())
+        // Warmup check
+        if (checkWarmup && InWarmup)
             return HookResult.Continue;
 
-        var item = weapon.DesignerName;
-        
-        // not a weapon we want to restrict
-        if (!_weaponPrices.ContainsKey(item))
+        CCSWeaponBaseVData vdata = VirtualFunctions.GetCSWeaponDataFromKeyFunc.Invoke(-1, hook.GetParam<CEconItemView>(1).ItemDefinitionIndex.ToString()) ?? throw new Exception("Failed to get CCSWeaponBaseVData");
+
+        // Weapon is not restricted
+        if (!_weaponPrices.ContainsKey(vdata.Name))
             return HookResult.Continue;
 
-        // not exceeding limits
-        var weaponsInTeam = GetWeaponCountInTeam(item, player.Team);
-        var allowedWeapons = GetAllowedWeaponCount(item);
+        CCSPlayerController client = hook.GetParam<CCSPlayer_ItemServices>(0).Pawn.Value!.Controller.Value!.As<CCSPlayerController>();
 
-        var willExceedLimits = allowedWeapons != -1 && weaponsInTeam + 1 > allowedWeapons;
-
-        if (!willExceedLimits)
+        if (client == null || !client.IsValid || !client.PawnIsAlive)
             return HookResult.Continue;
-        
-        // skip warning if we already warned this player in the last 10 seconds
-        if (!_lastWeaponRestrictPrint.TryGetValue(player.Pawn.Index, out var lastPrintTime) ||
-            lastPrintTime + 10 <= Server.CurrentTime)
+
+        // Player is Admin with "@css/cheats" flag and custom one
+        if (AdminManager.PlayerHasPermissions(client, ["@css/cheats", AllowedFlag]))
+            return HookResult.Continue;
+
+        // Get every valid player that is currently connected
+        IEnumerable<CCSPlayerController> players = Utilities.GetPlayers().Where(player =>
+            player.IsValid // Unneccessary?
+            && player.Connected == PlayerConnectedState.PlayerConnected
+            && player.Team == client.Team
+            );
+
+        int limit = GetAllowedWeaponCount(vdata.Name);
+        bool disabled = limit <= -1;
+
+        if (!disabled)
         {
-            player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
-            
-            _lastWeaponRestrictPrint[player.Pawn.Index] = Server.CurrentTime;
+            int count = GetWeaponCountInTeam(vdata.Name, client.Team);
+            if (count < limit)
+                return HookResult.Continue;
         }
-        
-        // weapon was created this tick (aka purchased and not picked up)
-        if (Math.Abs(weapon.CreateTime - Server.CurrentTime) < 0.01f)
+        else
         {
-            CCSWeaponBaseGun weaponBaseGun = new(weapon.Handle);
-            weaponBaseGun.Remove();
+            return HookResult.Continue;
         }
-        
-        hook.SetReturn(false);
-        return HookResult.Handled;
-    }
-    
-    public HookResult OnItemPurchase(EventItemPurchase eventItemPurchase, GameEventInfo info)
-    {
-        var player = eventItemPurchase.Userid;
 
-        // not a player
-        if (!player.IsPlayer())
-            return HookResult.Continue;
+        // Print chat message if we attempted to do anything except pick up this weapon. This is to prevent chat spam.
+        if (hook.GetParam<AcquireMethod>(2) != AcquireMethod.PickUp)
+        {
+            hook.SetReturn(AcquireResult.AlreadyOwned);
 
-        // get weapon name
-        var item = eventItemPurchase.Weapon;
+            Server.NextFrame(() => client.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{vdata.Name}{ChatColors.Default} is restricted to {ChatColors.Red}{limit}{ChatColors.Default} per team!"));
+        }
+        else
+        {
+            hook.SetReturn(AcquireResult.InvalidItem);
+        }
 
-        // not a weapon we want to restrict
-        if (!_weaponPrices.ContainsKey(item))
-            return HookResult.Continue;
+        RefundItem(client, vdata.Name);
 
-        // not exceeding limits
-        var weaponsInTeam = GetWeaponCountInTeam(item, player!.Team);
-        var allowedWeapons = GetAllowedWeaponCount(item);
-
-        var willExceedLimits = allowedWeapons != -1 && weaponsInTeam + 1 > allowedWeapons;
-
-        Console.WriteLine(weaponsInTeam);
-        Console.WriteLine(allowedWeapons);
-        
-        if (!willExceedLimits)
-            return HookResult.Continue;
-
-        player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
-
-        RefundItem(player, item);
-
-        return HookResult.Continue;
+        return HookResult.Stop;
     }
     
     private void RefundItem(CCSPlayerController player, string item)

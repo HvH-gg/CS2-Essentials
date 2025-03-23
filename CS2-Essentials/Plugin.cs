@@ -70,7 +70,6 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         _serviceProvider = services.BuildServiceProvider();
 
         // register features
-        UseMetaCommandsBlocker();
         UseWeaponRestrict();
         UseRapidFireRestrict();
         UseFriendlyFireRestrict();
@@ -78,7 +77,8 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         UseResetScore();
         UseMisc();
         UseTeleport();
-        
+        UseMetaCommandsBlocker();
+
         Console.WriteLine("[HvH.gg] Finished loading HvH.gg Essentials plugin");
     }
 
@@ -183,9 +183,22 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         Console.WriteLine("[HvH.gg] Register weapon restriction listeners");
         
         var weaponRestrict = _serviceProvider!.GetRequiredService<WeaponRestrict>();
-        RegisterEventHandler<EventItemPurchase>(weaponRestrict.OnItemPurchase);
-        VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Hook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
-        
+        VirtualFunctions.CCSPlayer_ItemServices_CanAcquireFunc.Hook(weaponRestrict.OnWeaponCanAcquire, HookMode.Pre);
+
+        RegisterEventHandler<EventRoundAnnounceWarmup>((@event, info) =>
+        {
+            weaponRestrict.InWarmup = true;
+
+            return HookResult.Continue;
+        });
+
+        RegisterEventHandler<EventRoundAnnounceMatchStart>((@event, info) =>
+        {
+            weaponRestrict.InWarmup = false;
+
+            return HookResult.Continue;
+        });
+
         Console.WriteLine("[HvH.gg] Finished registering weapon restriction listeners");
     }
     
@@ -201,8 +214,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(friendlyFire.OnTakeDamage, HookMode.Pre);
         
         var weaponRestrict = _serviceProvider.GetRequiredService<WeaponRestrict>();
-        RegisterEventHandler<EventItemPurchase>(weaponRestrict.OnItemPurchase);
-        VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Unhook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
+        VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Unhook(weaponRestrict.OnWeaponCanAcquire, HookMode.Pre);
         
         var teleportFix = _serviceProvider.GetRequiredService<TeleportFix>();
         RunCommand.Unhook(teleportFix.RunCommand, HookMode.Pre);

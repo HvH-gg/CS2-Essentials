@@ -1,16 +1,21 @@
 {
   "RapidFireFixMethod": 1,
   "RapidFirePrintMessage": true,
-  "TeleportPrintMessage": true,
   "RapidFireReflectScale": 1,
   "AllowedAwpCount": -1,
   "AllowedScoutCount": -1,
   "AllowedAutoSniperCount": -1,
+  "AllowAllWeaponsOnWarmup": true,
+  "AllowWeaponsForFlag": "@css/restrict",
   "UnmatchedFriendlyFire": true,
   "RestrictTeleport": true,
+  "TeleportPrintMessage": true,
   "AllowAdPrint": true,
   "AllowSettingsPrint": true,
   "AllowResetScore": true,
+  "ShowResetScorePrint": true,
+  "AllowResetDeath": 1,
+  "ShowResetDeathPrint": true,
   "RestrictMetaCommands": true,
   "AllowRageQuit": true,
   "ChatPrefix": "[{Red}Hv{DarkRed}H{Default}.gg]",
@@ -18,7 +23,7 @@
     "FriendlyFireVote": true,
     "TeleportFixVote": true,
     "RapidFireVote": "full",
-    "Style":"center"
+    "Style": "center"
   },
-  "ConfigVersion": 5
+  "ConfigVersion": 6
 }

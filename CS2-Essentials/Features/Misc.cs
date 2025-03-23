@@ -93,7 +93,7 @@ public class Misc
         }
         
         if (_plugin.Config.AllowAdPrint)
-            player.PrintToChat(ChatUtils.FormatMessage("powered by {HvH.gg}"));
+            player.PrintToChat(ChatUtils.FormatMessage("powered by {HvHgg} and {FusionHVH}"));
         
     }
 }
