@@ -7,6 +7,7 @@ on:
     paths-ignore:
       - 'README.MD'
       - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build:
