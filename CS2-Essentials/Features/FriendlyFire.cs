@@ -41,8 +41,8 @@ public class FriendlyFire
             30,
             new Dictionary<string, VoteOption>
             {
-                { "Enable", new("{Green}Enable", new List<string> { "hvh_unmatched_friendlyfire 0" })},
-                { "Disable", new("{Red}Disable", new List<string> { "hvh_unmatched_friendlyfire 1" })},
+                { "Enable", new VoteOption("{Green}Enable", ["hvh_unmatched_friendlyfire 0"])},
+                { "Disable", new VoteOption("{Red}Disable", ["hvh_unmatched_friendlyfire 1"])},
             },
             plugin.Config.CustomVoteSettings.Style);
     }

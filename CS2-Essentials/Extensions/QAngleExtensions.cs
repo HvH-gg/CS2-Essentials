@@ -4,7 +4,7 @@ public static class QAngleExtensions
 {
     public static bool IsValid(this CounterStrikeSharp.API.Modules.Utils.QAngle angle)
     {
-        return angle.IsFinite() && !angle.IsNaN() && angle.IsReasonable();
+        return angle.IsFinite() && !angle.IsNaN() && angle.IsAllowed();
     }
 
     private static bool IsFinite(this CounterStrikeSharp.API.Modules.Utils.QAngle angle)
@@ -49,7 +49,7 @@ public static class QAngleExtensions
 
     private static void Clamp(this CounterStrikeSharp.API.Modules.Utils.QAngle angle)
     {
-        angle.X = Math.Clamp(angle.X, -179.0f, 179.0f);
+        angle.X = Math.Clamp(angle.X, -179.9f, 179.9f);
         angle.Y = Math.Clamp(angle.Y, -180.0f, 180.0f);
     }
     
@@ -67,5 +67,13 @@ public static class QAngleExtensions
             q.X is > -r and < r &&
             q.Y is > -r and < r &&
             q.Z is > -r and < r;
+    }
+    
+    private static bool IsAllowed(this CounterStrikeSharp.API.Modules.Utils.QAngle q)
+    {
+        return
+            q.X is >= -179.9f and <= 179.9f &&
+            q.Y is >= -180.0f and <= 180.0f &&
+            q.Z is >= -180.0f and <= 180.0f;
     }
 }
