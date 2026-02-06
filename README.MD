@@ -27,14 +27,16 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 4. Restart your server
 
 # Config
-To reload your config after editing, use `hvh_cfg_~~~~reload` in the server console.
+To reload your config after editing, use `hvh_cfg_reload` in the server console.
 ```json
 {
+   "PrintWarnings": true,
    "RapidFireFixMethod": 1, // 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive
    "RapidFireReflectScale": 1, // damage reflect percentage (0.0 - 1.0)
    "AllowedAwpCount": -1, // how many awps are allowed per team (0 for none, -1 for unlimited)
    "AllowedScoutCount": -1, // how many scouts are allowed per team (0 for none, -1 for unlimited)
    "AllowedAutoSniperCount": -1, // how many auto snipers are allowed per team (0 for none, -1 for unlimited)
+   "WeaponRestrictBypassFlags": "", // csv list - e.g. @css/vip,@css/root
    "UnmatchedFriendlyFire": true, // if true, only utility damage will be dealt to teammates (like on unmatched.gg)
    "RestrictTeleport": true, // if true, the teleport and airstuck exploit will be restricted. This will also prevent the server crash exploit
    "AllowAdPrint": true, // if true, players will see a "powered by HvH.gg" ad in the chat with the settings print
