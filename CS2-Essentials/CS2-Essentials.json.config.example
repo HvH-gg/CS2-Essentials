@@ -1,9 +1,11 @@
 {
+  "PrintWarnings": true,
   "RapidFireFixMethod": 1,
   "RapidFireReflectScale": 1,
   "AllowedAwpCount": -1,
   "AllowedScoutCount": -1,
   "AllowedAutoSniperCount": -1,
+  "WeaponRestrictBypassFlags": "",
   "UnmatchedFriendlyFire": true,
   "RestrictTeleport": true,
   "AllowAdPrint": true,
@@ -17,5 +19,5 @@
     "RapidFireVote": "full",
 	"Style":"center"
   },
-  "ConfigVersion": 4
+  "ConfigVersion": 5
 }

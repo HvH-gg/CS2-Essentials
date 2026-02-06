@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Cvars.Validators;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Utils;
 using CSSharpUtils.Extensions;
 using CSSharpUtils.Utils;
@@ -24,6 +25,7 @@ public class WeaponRestrict
     public static readonly FakeConVar<int> hvh_restrict_awp = new("hvh_restrict_awp", "Restrict awp to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
     public static readonly FakeConVar<int> hvh_restrict_scout = new("hvh_restrict_scout", "Restrict scout to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
     public static readonly FakeConVar<int> hvh_restrict_auto = new("hvh_restrict_auto", "Restrict autosniper to X per team", -1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(-1, int.MaxValue));
+    public static readonly FakeConVar<string> hvh_bypass_weapon_restrict_flag = new("hvh_bypass_weapon_restrict_flag", "Permission flag to bypass weapon restrictions", "");
 
     public WeaponRestrict(Plugin plugin)
     {
@@ -32,93 +34,53 @@ public class WeaponRestrict
         hvh_restrict_awp.Value = _plugin.Config.AllowedAwpCount;
         hvh_restrict_scout.Value = _plugin.Config.AllowedScoutCount;
         hvh_restrict_auto.Value = _plugin.Config.AllowedAutoSniperCount;
+        hvh_bypass_weapon_restrict_flag.Value = _plugin.Config.WeaponRestrictBypassFlags;
     }
     
-    public HookResult OnWeaponCanUse(DynamicHook hook)
+    public HookResult OnWeaponCanAcquire(DynamicHook hook)
     {
-        var weaponServices = hook.GetParam<CCSPlayer_WeaponServices>(0);
-        var weapon = hook.GetParam<CBasePlayerWeapon>(1);
+        var itemServices = hook.GetParam<CCSPlayer_ItemServices>(0);
+        var econItemView = hook.GetParam<CEconItemView>(1);
+        var acquireMethod = hook.GetParam<AcquireMethod>(2);
 
-        var player = new CCSPlayerController(weaponServices.Pawn.Value.Controller.Value!.Handle);
+        // find weapon name from item definition index
+        var itemDefIndex = econItemView.ItemDefinitionIndex;
+        var item = _weaponPrices.FirstOrDefault(kv => (ushort)kv.Value.Item1 == itemDefIndex).Key;
+
+        // not a weapon we want to restrict
+        if (item == null)
+            return HookResult.Continue;
+
+        var player = itemServices.Pawn.Value.Controller.Value!.As<CCSPlayerController>();
 
         // not a player
         if (!player.IsPlayer())
             return HookResult.Continue;
 
-        var item = weapon.DesignerName;
-        
-        // not a weapon we want to restrict
-        if (!_weaponPrices.ContainsKey(item))
+        // player has bypass permission
+        if (hvh_bypass_weapon_restrict_flag.Value != "" &&
+            hvh_bypass_weapon_restrict_flag.Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Any(flag => AdminManager.PlayerHasPermissions(player, flag)))
             return HookResult.Continue;
 
-        // not exceeding limits
         var weaponsInTeam = GetWeaponCountInTeam(item, player.Team);
         var allowedWeapons = GetAllowedWeaponCount(item);
-
         var willExceedLimits = allowedWeapons != -1 && weaponsInTeam + 1 > allowedWeapons;
 
+        // not exceeding limits
         if (!willExceedLimits)
             return HookResult.Continue;
-        
+
         // skip warning if we already warned this player in the last 10 seconds
         if (!_lastWeaponRestrictPrint.TryGetValue(player.Pawn.Index, out var lastPrintTime) ||
             lastPrintTime + 10 <= Server.CurrentTime)
         {
             player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
-            
             _lastWeaponRestrictPrint[player.Pawn.Index] = Server.CurrentTime;
         }
-        
-        // weapon was created this tick (aka purchased and not picked up)
-        if (Math.Abs(weapon.CreateTime - Server.CurrentTime) < 0.01f)
-        {
-            CCSWeaponBaseGun weaponBaseGun = new(weapon.Handle);
-            weaponBaseGun.Remove();
-        }
-        
-        hook.SetReturn(false);
-        return HookResult.Handled;
-    }
-    
-    public HookResult OnItemPurchase(EventItemPurchase eventItemPurchase, GameEventInfo info)
-    {
-        var player = eventItemPurchase.Userid;
 
-        // not a player
-        if (!player.IsPlayer())
-            return HookResult.Continue;
-
-        // get weapon name
-        var item = eventItemPurchase.Weapon;
-
-        // not a weapon we want to restrict
-        if (!_weaponPrices.ContainsKey(item))
-            return HookResult.Continue;
-
-        // not exceeding limits
-        var weaponsInTeam = GetWeaponCountInTeam(item, player!.Team);
-        var allowedWeapons = GetAllowedWeaponCount(item);
-
-        var willExceedLimits = allowedWeapons != -1 && weaponsInTeam + 1 > allowedWeapons;
-
-        Console.WriteLine(weaponsInTeam);
-        Console.WriteLine(allowedWeapons);
-        
-        if (!willExceedLimits)
-            return HookResult.Continue;
-
-        player.PrintToChat($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} {ChatColors.Red}{item}{ChatColors.Default} is restricted to {ChatColors.Red}{allowedWeapons}{ChatColors.Default} per team!");
-
-        RefundItem(player, item);
-
-        return HookResult.Continue;
-    }
-    
-    private void RefundItem(CCSPlayerController player, string item)
-    {
-        var moneyServices = player.InGameMoneyServices!;
-        moneyServices.Account += _weaponPrices[item].Item2;
-        Console.WriteLine($"[HvH.gg] Refunding {item} for {_weaponPrices[item].Item2}");
+        hook.SetReturn(acquireMethod == AcquireMethod.PickUp ? AcquireResult.InvalidItem : AcquireResult.AlreadyOwned);
+        return HookResult.Stop;
     }
     
     private int GetAllowedWeaponCount(string item)

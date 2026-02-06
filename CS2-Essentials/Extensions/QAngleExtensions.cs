@@ -60,7 +60,7 @@ public static class QAngleExtensions
         angle.Z = (angle.Z + 180.0f) % 360.0f - 180.0f;
     }
 
-    private static bool IsReasonable(this CounterStrikeSharp.API.Modules.Utils.QAngle q )
+    internal static bool IsReasonable(this CounterStrikeSharp.API.Modules.Utils.QAngle q )
     {
         const float r = 360.0f * 1000.0f;
         return
@@ -69,10 +69,10 @@ public static class QAngleExtensions
             q.Z is > -r and < r;
     }
     
-    private static bool IsAllowed(this CounterStrikeSharp.API.Modules.Utils.QAngle q)
+    internal static bool IsAllowed(this CounterStrikeSharp.API.Modules.Utils.QAngle q)
     {
         return
-            q.X is >= -179.9f and <= 179.9f &&
+            q.X is >= -179f and <= 179f &&
             q.Y is >= -180.0f and <= 180.0f &&
             q.Z is >= -180.0f and <= 180.0f;
     }

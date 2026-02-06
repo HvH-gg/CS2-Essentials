@@ -13,7 +13,7 @@ namespace hvhgg_essentials;
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.3.0";
+    public override string ModuleVersion => "1.4.0";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -37,6 +37,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         WeaponRestrict.hvh_restrict_awp.Value = Config.AllowedAwpCount;
         WeaponRestrict.hvh_restrict_scout.Value = Config.AllowedScoutCount;
         WeaponRestrict.hvh_restrict_auto.Value = Config.AllowedAutoSniperCount;
+        WeaponRestrict.hvh_bypass_weapon_restrict_flag.Value = Config.WeaponRestrictBypassFlags;
         ResetScore.hvh_resetscore.Value = Config.AllowResetScore;
         RageQuit.hvh_ragequit.Value = Config.AllowRageQuit;
     }
@@ -166,8 +167,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         Console.WriteLine("[HvH.gg] Register weapon restriction listeners");
         
         var weaponRestrict = _serviceProvider!.GetRequiredService<WeaponRestrict>();
-        RegisterEventHandler<EventItemPurchase>(weaponRestrict.OnItemPurchase);
-        VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Hook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
+        VirtualFunctions.CCSPlayer_ItemServices_CanAcquireFunc.Hook(weaponRestrict.OnWeaponCanAcquire, HookMode.Pre);
         
         Console.WriteLine("[HvH.gg] Finished registering weapon restriction listeners");
     }
@@ -184,8 +184,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Unhook(friendlyFire.OnTakeDamage, HookMode.Pre);
         
         var weaponRestrict = _serviceProvider.GetRequiredService<WeaponRestrict>();
-        RegisterEventHandler<EventItemPurchase>(weaponRestrict.OnItemPurchase);
-        VirtualFunctions.CCSPlayer_WeaponServices_CanUseFunc.Unhook(weaponRestrict.OnWeaponCanUse, HookMode.Pre);
+        VirtualFunctions.CCSPlayer_ItemServices_CanAcquireFunc.Unhook(weaponRestrict.OnWeaponCanAcquire, HookMode.Pre);
         
         var teleportFix = _serviceProvider.GetRequiredService<TeleportFix>();
         RunCommand.Unhook(teleportFix.RunCommand, HookMode.Pre);

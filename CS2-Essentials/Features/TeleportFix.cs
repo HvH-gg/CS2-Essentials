@@ -67,6 +67,9 @@ public class TeleportFix
         if (viewAngles is null || viewAngles.IsValid()) 
             return HookResult.Continue;
         
+        // false on super high angles, true on fake up/down
+        var isReasonable = viewAngles.IsReasonable();
+        
         // fix the view angles (prevents the player from using teleport or airstuck)
         viewAngles.Fix();
 
@@ -75,8 +78,11 @@ public class TeleportFix
             !(lastWarningTime + 3 <= Server.CurrentTime)) 
             return HookResult.Changed;
         
+        if (!_plugin.Config.PrintWarnings) 
+            return HookResult.Changed;
+        
         // print a warning to all players
-        var feature = player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
+        var feature = isReasonable ? "fake up/down" : player.Pawn.Value!.As<CCSPlayerPawn>().OnGroundLastTick ? "teleport" : "airstuck";
         Server.PrintToChatAll($"{ChatUtils.FormatMessage(_plugin.Config.ChatPrefix)} Player {ChatColors.Red}{player.PlayerName}{ChatColors.Default} tried using {ChatColors.Red}{feature}{ChatColors.Default}!");
         _teleportBlockWarnings[player.Index] = Server.CurrentTime;
 
