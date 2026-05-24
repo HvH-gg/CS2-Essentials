@@ -13,7 +13,7 @@ namespace hvhgg_essentials;
 public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
 {
     public override string ModuleName => "HvH.gg - Essentials";
-    public override string ModuleVersion => "1.4.0";
+    public override string ModuleVersion => "1.5.0";
     public override string ModuleAuthor => "imi-tat0r";
     public override string ModuleDescription => "Essential features for CS2 HvH servers";
     public Cs2EssentialsConfig Config { get; set; } = new();
@@ -157,6 +157,7 @@ public class Plugin : BasePlugin, IPluginConfig<Cs2EssentialsConfig>
         Console.WriteLine("[HvH.gg] Register rapid fire listeners");
         
         var rapidFire = _serviceProvider!.GetRequiredService<RapidFire>();
+        RegisterEventHandler<EventBulletImpact>(rapidFire.OnBulletImpact, HookMode.Pre);
         RegisterEventHandler<EventWeaponFire>(rapidFire.OnWeaponFire);
         VirtualFunctions.CBaseEntity_TakeDamageOldFunc.Hook(rapidFire.OnTakeDamage, HookMode.Pre);
         

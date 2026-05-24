@@ -72,7 +72,7 @@ public class RapidFire
 
     public HookResult OnWeaponFire(EventWeaponFire eventWeaponFire, GameEventInfo info)
     {
-        if (!eventWeaponFire.Userid.IsPlayer())
+        if (!eventWeaponFire.Userid.IsPlayer() || hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
             return HookResult.Continue;
         
         var firedWeapon = eventWeaponFire.Userid!.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
@@ -125,6 +125,9 @@ public class RapidFire
     
     public HookResult OnTakeDamage(DynamicHook h)
     {
+        if(hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
+            return HookResult.Continue;
+
         var damageInfo = h.GetParam<CTakeDamageInfo>(1);
 
         // attacker is invalid
@@ -155,5 +158,31 @@ public class RapidFire
         }
 
         return HookResult.Changed;
+    }
+
+    public HookResult OnBulletImpact(EventBulletImpact eventBulletImpact, GameEventInfo info)
+    {
+        if (hvh_restrict_rapidfire.Value != (int)FixMethod.Ignore)
+            return HookResult.Continue;
+
+        var firedWeapon = eventBulletImpact.Userid!.Pawn.Value!.WeaponServices!.ActiveWeapon.Value;
+
+        if (firedWeapon == null || firedWeapon.DesignerName == "weapon_revolver")
+            return HookResult.Continue;
+
+        var weaponData = firedWeapon.GetVData<CCSWeaponBaseVData>();
+
+        if (weaponData == null)
+            return HookResult.Continue;
+
+        int tickBase = (int)eventBulletImpact.Userid.TickBase;
+        int fixedPrimaryTick = (int)Math.Round(weaponData.CycleTime.Values[0] * 64) - 3;
+
+        firedWeapon.NextPrimaryAttackTick = Math.Max(firedWeapon.NextPrimaryAttackTick, tickBase + fixedPrimaryTick);
+
+        // maybe deprecated as CSSharp auto setting state changes
+        Utilities.SetStateChanged(firedWeapon, "CBasePlayerWeapon", "m_nNextPrimaryAttackTick");
+
+        return HookResult.Continue;
     }
 }
