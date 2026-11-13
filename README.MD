@@ -1,6 +1,6 @@
 ![Copyright ev0lve Digital](https://img.shields.io/badge/Copyright-ev0lve%20Digital-blue) ![GitHub License](https://img.shields.io/github/license/HvH-gg/CS2-Essentials) ![Issues](https://img.shields.io/github/issues/HvH-gg/CS2-Essentials) ![Downloads](https://img.shields.io/github/downloads/HvH-gg/CS2-Essentials/total) ![Stars](https://img.shields.io/github/stars/HvH-gg/CS2-Essentials)
 
-# [HvH.gg](https://hvh.gg) CS2 Essentials (1.5.0)
+# [HvH.gg](https://hvh.gg) CS2 Essentials (1.6.0)
 ### If you use this plugin, you do NOT need [RapidFireFix](https://github.com/HvH-gg/RapidFireFix) anymore.
 
 Our CS2 Essentials plugin is the only plugin you need to run a successful HvH server. It includes basic features like **reset score** and **rage quit** as well as optional restrictions for **weapons**, **friendly fire**, **rapid fire** and other exploit/crash fixes.
@@ -11,7 +11,7 @@ Our CS2 Essentials plugin is the only plugin you need to run a successful HvH se
 - Rage quit `!rq`
 - Restrict weapons (awp, scout, autosniper)
 - Restrict friendly fire (default, only utility damage)
-- Restrict rapid fire (0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive)
+- Restrict rapid fire (0 allows rapid fire, 1 blocks the rapid fire shot, 2 reflects damage scaled, 3 reflects damage but keeps the player alive, 4 lets the shot through but prevents its damage)
 - **Linux only:** Restrict teleport/airstuck exploit (enabling this will also prevent the server crash exploit)
 
 # Requirements
@@ -31,7 +31,7 @@ To reload your config after editing, use `hvh_cfg_reload` in the server console.
 ```json
 {
    "PrintWarnings": true,
-   "RapidFireFixMethod": 1, // 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive
+   "RapidFireFixMethod": 1, // 0 allows rapid fire, 1 blocks the rapid fire shot, 2 reflects damage scaled, 3 reflects damage but keeps the player alive, 4 lets the shot through but prevents its damage
    "RapidFireReflectScale": 1, // damage reflect percentage (0.0 - 1.0)
    "AllowedAwpCount": -1, // how many awps are allowed per team (0 for none, -1 for unlimited)
    "AllowedScoutCount": -1, // how many scouts are allowed per team (0 for none, -1 for unlimited)
@@ -56,7 +56,7 @@ To reload your config after editing, use `hvh_cfg_reload` in the server console.
 
 # ConVars
 Instead of editing the config file, you can also use the following ConVars to change certain settings **on the fly**. These changes will **NOT** be saved to the config file and will be reset after a server restart.
-- `hvh_restrict_rapidfire` 0 allows rapid fire, 1 blocks rapid fire, 2 reflects damage scaled, 3 reflects damage but keeps the player alive
+- `hvh_restrict_rapidfire` 0 allows rapid fire, 1 blocks the rapid fire shot, 2 reflects damage scaled, 3 reflects damage but keeps the player alive, 4 lets the shot through but prevents its damage
 - `hvh_rapidfire_reflect_scale` damage reflect percentage, 0.0 - 1.0
 - `hvh_restrict_teleport` if true, the teleport and airstuck exploit will be restricted. This will also prevent the server crash exploit
 - `hvh_restrict_awp` how many awps are allowed per team, 0 for none, -1 for unlimited

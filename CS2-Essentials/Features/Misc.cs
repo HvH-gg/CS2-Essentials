@@ -61,6 +61,9 @@ public class Misc
                 case FixMethod.Allow:
                     break;
                 case FixMethod.Ignore:
+                    player.PrintToChat($"Method: {ChatColors.Red}block shot");
+                    break;
+                case FixMethod.PreventDamage:
                     player.PrintToChat($"Method: {ChatColors.Red}block damage");
                     break;
                 case FixMethod.Reflect:

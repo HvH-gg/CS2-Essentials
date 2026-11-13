@@ -1,4 +1,4 @@
-﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Cvars.Validators;
@@ -18,7 +18,7 @@ public class RapidFire
     private readonly Dictionary<uint, float> _rapidFireBlockWarnings = new();
 
     private readonly Plugin _plugin;
-    public static readonly FakeConVar<int> hvh_restrict_rapidfire = new("hvh_restrict_rapidfire", "Restrict rapid fire", 0, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(0, 3));
+    public static readonly FakeConVar<int> hvh_restrict_rapidfire = new("hvh_restrict_rapidfire", "Restrict rapid fire", 0, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<int>(0, 4));
     public static readonly FakeConVar<float> hvh_rapidfire_reflect_scale = new("hvh_rapidfire_reflect_scale", "Reflect scale", 1, ConVarFlags.FCVAR_REPLICATED, new RangeValidator<float>(0, 1));
 
     public RapidFire(Plugin plugin)
@@ -37,6 +37,7 @@ public class RapidFire
             FixMethod.Ignore => "Block",
             FixMethod.Reflect => "Reflect",
             FixMethod.ReflectSafe => "Reflect (safe)",
+            FixMethod.PreventDamage => "Prevent damage",
             _ => "Allow"
         };
 
@@ -51,6 +52,7 @@ public class RapidFire
             {
                 options.Add("Reflect", new VoteOption("{Orange}Reflect", new List<string> { "hvh_restrict_rapidfire 2" }));
                 options.Add("Reflect (safe)", new VoteOption("{Orange}Reflect (safe)", new List<string> { "hvh_restrict_rapidfire 3" }));
+                options.Add("Prevent damage", new VoteOption("{Red}Prevent damage", new List<string> { "hvh_restrict_rapidfire 4" }));
             }
         }
         
@@ -72,8 +74,11 @@ public class RapidFire
 
     public HookResult OnWeaponFire(EventWeaponFire eventWeaponFire, GameEventInfo info)
     {
-        if (!eventWeaponFire.Userid.IsPlayer() || hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
+        if (!eventWeaponFire.Userid.IsPlayer())
             return HookResult.Continue;
+
+        if (hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
+            DelayNextAttack(eventWeaponFire.Userid!);
         
         var firedWeapon = eventWeaponFire.Userid!.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
         var weaponData = firedWeapon?.GetVData<CCSWeaponBaseVData>();
@@ -125,7 +130,8 @@ public class RapidFire
     
     public HookResult OnTakeDamage(DynamicHook h)
     {
-        if(hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
+        // the ignore method blocks the shot itself, damage stays untouched
+        if (hvh_restrict_rapidfire.Value == (int)FixMethod.Ignore)
             return HookResult.Continue;
 
         var damageInfo = h.GetParam<CTakeDamageInfo>(1);
@@ -143,7 +149,7 @@ public class RapidFire
         {
             case (int)FixMethod.Allow:
                 break;
-            case (int)FixMethod.Ignore:
+            case (int)FixMethod.PreventDamage:
                 damageInfo.Damage = 0;
                 break;
             case (int)FixMethod.Reflect:
@@ -165,24 +171,34 @@ public class RapidFire
         if (hvh_restrict_rapidfire.Value != (int)FixMethod.Ignore)
             return HookResult.Continue;
 
-        var firedWeapon = eventBulletImpact.Userid!.Pawn.Value!.WeaponServices!.ActiveWeapon.Value;
+        if (!eventBulletImpact.Userid.IsPlayer())
+            return HookResult.Continue;
+
+        DelayNextAttack(eventBulletImpact.Userid!);
+
+        return HookResult.Continue;
+    }
+
+    // pushes the next primary attack out by the weapon's cycle time so a shifted second shot is never fired
+    private static void DelayNextAttack(CCSPlayerController player)
+    {
+        var firedWeapon = player.Pawn.Value?.WeaponServices?.ActiveWeapon.Value;
 
         if (firedWeapon == null || firedWeapon.DesignerName == "weapon_revolver")
-            return HookResult.Continue;
+            return;
 
         var weaponData = firedWeapon.GetVData<CCSWeaponBaseVData>();
 
         if (weaponData == null)
-            return HookResult.Continue;
+            return;
 
-        int tickBase = (int)eventBulletImpact.Userid.TickBase;
-        int fixedPrimaryTick = (int)Math.Round(weaponData.CycleTime.Values[0] * 64) - 3;
+        var cycleTicks = (int)Math.Round(weaponData.CycleTime.Values[0] * 64) - 3;
+        var nextAttackTick = (int)player.TickBase + cycleTicks;
 
-        firedWeapon.NextPrimaryAttackTick = Math.Max(firedWeapon.NextPrimaryAttackTick, tickBase + fixedPrimaryTick);
+        if (firedWeapon.NextPrimaryAttackTick >= nextAttackTick)
+            return;
 
-        // maybe deprecated as CSSharp auto setting state changes
+        firedWeapon.NextPrimaryAttackTick = nextAttackTick;
         Utilities.SetStateChanged(firedWeapon, "CBasePlayerWeapon", "m_nNextPrimaryAttackTick");
-
-        return HookResult.Continue;
     }
 }

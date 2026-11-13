@@ -6,5 +6,6 @@ public enum FixMethod
     Allow = 0,
     Ignore,
     Reflect,
-    ReflectSafe
+    ReflectSafe,
+    PreventDamage
 }
